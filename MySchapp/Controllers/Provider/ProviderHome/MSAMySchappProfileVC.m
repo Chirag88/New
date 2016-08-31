@@ -12,6 +12,7 @@
 #import "MSAMySchappProfileTableViewCell.h"
 #import "MSALocationListViewController.h"
 #import "MSAServiceProfileVC.h"
+#import "MSAProviderListViewController.h"
 
 @interface MSAMySchappProfileVC (){
     NSArray *homeItems;
@@ -76,8 +77,13 @@
         UIStoryboard *mainStoryboard = UISTORYBOARD;
         MSAServiceProfileVC *serviceProfile  = (MSAServiceProfileVC*)[mainStoryboard
                                                                       instantiateViewControllerWithIdentifier:@"MSAServiceProfileVC"];
-        [self.navigationController pushViewController:serviceProfile animated:YES];    }
-    
+        [self.navigationController pushViewController:serviceProfile animated:YES];
+    }
+    else if (indexPath.row == 3) {
+        UIStoryboard *mainStoryboard = UISTORYBOARD;
+        MSAProviderListViewController *providerListCtrlr  = (MSAProviderListViewController*)[mainStoryboard instantiateViewControllerWithIdentifier:@"MSAProviderListViewController"];
+        [self.navigationController pushViewController:providerListCtrlr animated:YES];
+    }
 }
 
 

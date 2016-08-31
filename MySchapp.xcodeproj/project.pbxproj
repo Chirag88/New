@@ -48,6 +48,10 @@
 		8D2969981CD5120E00CDAE4E /* MSAAssociationTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D2969971CD5120E00CDAE4E /* MSAAssociationTableViewCell.m */; };
 		8D2969A31D02E42700CDAE4E /* MSALabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D2969A21D02E42700CDAE4E /* MSALabel.m */; };
 		8D3006A41D2D07DE0006BD98 /* MSAProviderHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D3006A31D2D07DE0006BD98 /* MSAProviderHomeViewController.m */; };
+		8DB49F871D55EA130090B3E5 /* MSAProviderListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DB49F861D55EA130090B3E5 /* MSAProviderListViewController.m */; };
+		8DB49F8A1D55F1040090B3E5 /* MSAProviderListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DB49F891D55F1040090B3E5 /* MSAProviderListTableViewCell.m */; };
+		8DB49F8D1D6994060090B3E5 /* MSAProviderProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DB49F8C1D6994060090B3E5 /* MSAProviderProfileViewController.m */; };
+		8DB49F901D71981F0090B3E5 /* MSASpecialitiesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DB49F8F1D71981F0090B3E5 /* MSASpecialitiesTableViewController.m */; };
 		8DC931AC1C84B78700673F02 /* MSANetworkHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DC931A71C84B78700673F02 /* MSANetworkHandler.m */; };
 		8DC931AE1C84B78700673F02 /* MSARequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DC931AB1C84B78700673F02 /* MSARequest.m */; };
 		8DC931B01C87516C00673F02 /* logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8DC931AF1C87516C00673F02 /* logo@2x.png */; };
@@ -192,6 +196,14 @@
 		8D2969A21D02E42700CDAE4E /* MSALabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALabel.m; sourceTree = "<group>"; };
 		8D3006A21D2D07DE0006BD98 /* MSAProviderHomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAProviderHomeViewController.h; sourceTree = "<group>"; };
 		8D3006A31D2D07DE0006BD98 /* MSAProviderHomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAProviderHomeViewController.m; sourceTree = "<group>"; };
+		8DB49F851D55EA130090B3E5 /* MSAProviderListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAProviderListViewController.h; sourceTree = "<group>"; };
+		8DB49F861D55EA130090B3E5 /* MSAProviderListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAProviderListViewController.m; sourceTree = "<group>"; };
+		8DB49F881D55F1040090B3E5 /* MSAProviderListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAProviderListTableViewCell.h; sourceTree = "<group>"; };
+		8DB49F891D55F1040090B3E5 /* MSAProviderListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAProviderListTableViewCell.m; sourceTree = "<group>"; };
+		8DB49F8B1D6994060090B3E5 /* MSAProviderProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAProviderProfileViewController.h; sourceTree = "<group>"; };
+		8DB49F8C1D6994060090B3E5 /* MSAProviderProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAProviderProfileViewController.m; sourceTree = "<group>"; };
+		8DB49F8E1D71981F0090B3E5 /* MSASpecialitiesTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSASpecialitiesTableViewController.h; sourceTree = "<group>"; };
+		8DB49F8F1D71981F0090B3E5 /* MSASpecialitiesTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSASpecialitiesTableViewController.m; sourceTree = "<group>"; };
 		8DC931A61C84B78700673F02 /* MSANetworkHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSANetworkHandler.h; sourceTree = "<group>"; };
 		8DC931A71C84B78700673F02 /* MSANetworkHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSANetworkHandler.m; sourceTree = "<group>"; };
 		8DC931AA1C84B78700673F02 /* MSARequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSARequest.h; sourceTree = "<group>"; };
@@ -514,6 +526,14 @@
 		D458FE861D36C1670055CF17 /* ProvidersAtLocations */ = {
 			isa = PBXGroup;
 			children = (
+				8DB49F8E1D71981F0090B3E5 /* MSASpecialitiesTableViewController.h */,
+				8DB49F8F1D71981F0090B3E5 /* MSASpecialitiesTableViewController.m */,
+				8DB49F851D55EA130090B3E5 /* MSAProviderListViewController.h */,
+				8DB49F861D55EA130090B3E5 /* MSAProviderListViewController.m */,
+				8DB49F881D55F1040090B3E5 /* MSAProviderListTableViewCell.h */,
+				8DB49F891D55F1040090B3E5 /* MSAProviderListTableViewCell.m */,
+				8DB49F8B1D6994060090B3E5 /* MSAProviderProfileViewController.h */,
+				8DB49F8C1D6994060090B3E5 /* MSAProviderProfileViewController.m */,
 			);
 			path = ProvidersAtLocations;
 			sourceTree = "<group>";
@@ -1124,9 +1144,11 @@
 				D4EEF8841C7B90C400F7248C /* MSAJsonParser.m in Sources */,
 				8DC931CE1C90B75600673F02 /* MSAOTPFailureViewController.m in Sources */,
 				D4EEF8901C7B927600F7248C /* MSASignupViewController.m in Sources */,
+				8DB49F901D71981F0090B3E5 /* MSASpecialitiesTableViewController.m in Sources */,
 				D4EEF8631C7B8BEB00F7248C /* ViewController.m in Sources */,
 				D4E088531C942E99005BB7B6 /* MSAPlanDetailViewController.m in Sources */,
 				8DC931CB1C90AF4C00673F02 /* MSAOTPSuccessViewController.m in Sources */,
+				8DB49F8A1D55F1040090B3E5 /* MSAProviderListTableViewCell.m in Sources */,
 				8D2969391CC16B9900CDAE4E /* iCarousel.m in Sources */,
 				8DC931AC1C84B78700673F02 /* MSANetworkHandler.m in Sources */,
 				8D29694F1CCCF93E00CDAE4E /* MSASubCategoryViewController.m in Sources */,
@@ -1141,6 +1163,7 @@
 				D461D60A1D5A5F7000EE830F /* MSAServiceProfileVC.m in Sources */,
 				D40DC2701CA3FD19002E965B /* MSAPlanDetailTableViewCell.m in Sources */,
 				D4E623E61CCB820D00F6DB51 /* MSAChangePwdViewController.m in Sources */,
+				8DB49F8D1D6994060090B3E5 /* MSAProviderProfileViewController.m in Sources */,
 				D419A06B1CBAEC8100B8CA3F /* MSASecurityViewController.m in Sources */,
 				D47ABDEC1CC3E79C001563C7 /* MSAPrivacyPolicyViewController.m in Sources */,
 				8DF999501C9B2B9E002CF488 /* MSALoginDecision.m in Sources */,
@@ -1157,6 +1180,7 @@
 				D4F5874C1CC6B21B00F8F0D1 /* MSAForgotPasswordViewController.m in Sources */,
 				D4EEF8971C7B944300F7248C /* MSALandingPageViewController.m in Sources */,
 				D419A0691CBAEC8100B8CA3F /* MSALanguageTableViewController.m in Sources */,
+				8DB49F871D55EA130090B3E5 /* MSAProviderListViewController.m in Sources */,
 				D4DB6E341D09F3C300336F5A /* UIImage+CL.m in Sources */,
 				8D3006A41D2D07DE0006BD98 /* MSAProviderHomeViewController.m in Sources */,
 				8D2969A31D02E42700CDAE4E /* MSALabel.m in Sources */,

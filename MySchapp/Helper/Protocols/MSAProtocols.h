@@ -38,6 +38,12 @@
 
 @end
 
+@protocol SpecialityDoneCancelDelegate <NSObject>
+
+- (void)specialityDoneClickedWithValues:(NSArray *)newSpecialities;
+
+@end
+
 @protocol ProfileEducationDoneCancelDelegate <NSObject>
 
 - (void)educationDoneClickedWithValues:(NSArray *)newEducation;
