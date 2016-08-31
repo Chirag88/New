@@ -1,0 +1,147 @@
+//
+//  MSANotificationViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 25/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSANotificationViewController.h"
+#import "MSANetworkHandler.h"
+#import "MSAConstants.h"
+#import "MSAProtocols.h"
+#import "MSAUtils.h"
+
+@interface MSANotificationViewController ()<MSANetworkDelegate>
+{
+    NSMutableDictionary *notificationData;
+}
+@property (weak, nonatomic) IBOutlet UIView *customSegmentView;
+@property (weak, nonatomic) IBOutlet UILabel *selectedPlanLbl;
+@end
+
+@implementation MSANotificationViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Notification";
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,NOTIFICATIONURL]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Notification" requestHeaders:reqHeadDict andRequestParameters:self.securityData inView:self.view];
+    
+    [self createUI];
+}
+
+- (void)createUI {
+    
+    [self createSegmentView];
+    self.selectedPlanLbl.text = [NSString stringWithFormat:@"Selected Plan : %@",self.selectedPlanName];
+}
+
+- (void)createSegmentView {
+    
+    UILabel *personalLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    personalLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    personalLbl.text = @"Personal";
+    personalLbl.textColor = kProfileSegmentDefaultFontColor;
+    personalLbl.font = kProfileSegmentFont;
+    personalLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *securityLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    securityLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    securityLbl.text = @"Security";
+    securityLbl.textColor = kProfileSegmentDefaultFontColor;
+    securityLbl.font = kProfileSegmentFont;
+    securityLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *notificationLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    notificationLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    notificationLbl.text = @"Notification";
+    notificationLbl.textColor = kProfileSegmentSelectedFontColor;
+    notificationLbl.font = kProfileSegmentFont;
+    notificationLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *paymentLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    paymentLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    paymentLbl.text = @"Payment";
+    paymentLbl.textColor = kProfileSegmentDefaultFontColor;
+    paymentLbl.font = kProfileSegmentFont;
+    paymentLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UIView *highlightedView = [[UIView alloc]initWithFrame:CGRectZero];
+    highlightedView.translatesAutoresizingMaskIntoConstraints = NO;
+    highlightedView.backgroundColor = kProfileSegmentSelectedFontColor;
+    [notificationLbl addSubview:highlightedView];
+    
+    if (self.selectedPlanId.integerValue != 1) {
+        [self.customSegmentView addSubview:personalLbl];
+        [self.customSegmentView addSubview:securityLbl];
+        [self.customSegmentView addSubview:notificationLbl];
+        [self.customSegmentView addSubview:paymentLbl];
+        
+        NSDictionary *views = @{@"personalLbl":personalLbl,@"securityLbl":securityLbl,@"notificationLbl":notificationLbl,@"paymentLbl":paymentLbl};
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[personalLbl(==securityLbl)]-[securityLbl(==paymentLbl)]-[notificationLbl]-[paymentLbl]-|" options:0 metrics:nil views:views]];
+        
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[personalLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[securityLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[notificationLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[paymentLbl]|" options:0 metrics:nil views:views]];
+        
+    }
+    else {
+        [self.customSegmentView addSubview:personalLbl];
+        [self.customSegmentView addSubview:securityLbl];
+        [self.customSegmentView addSubview:notificationLbl];
+        NSDictionary *views = @{@"personalLbl":personalLbl,@"securityLbl":securityLbl,@"notificationLbl":notificationLbl};
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[personalLbl(==securityLbl)]-[securityLbl(==notificationLbl)]-[notificationLbl]-|" options:0 metrics:nil views:views]];
+        
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[personalLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[securityLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[notificationLbl]|" options:0 metrics:nil views:views]];
+        
+        
+    }
+    
+    [notificationLbl addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[highlightedView(2)]|" options:0 metrics:nil views:@{@"highlightedView":highlightedView}]];
+    [notificationLbl addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[highlightedView]|" options:0 metrics:nil views:@{@"highlightedView":highlightedView}]];
+    
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
+        NSLog(@"Got Notification Data");
+        notificationData = [NSMutableDictionary dictionaryWithDictionary:responseDict];
+    }
+    else {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+    }
+    
+}
+
+-(void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+
+@end

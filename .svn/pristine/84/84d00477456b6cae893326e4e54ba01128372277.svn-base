@@ -1,0 +1,371 @@
+//
+//  MSANotificationViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 25/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSANotificationViewController.h"
+#import "MSANetworkHandler.h"
+#import "MSAConstants.h"
+#import "MSAProtocols.h"
+#import "MSAUtils.h"
+
+@interface MSANotificationViewController ()<MSANetworkDelegate>
+{
+    NSMutableDictionary *notificationData;
+    NSMutableDictionary *submitNotificationData;
+    NSArray *reminderHoursArray;
+    NSString *reminderHourSelectedValue;
+    __weak IBOutlet UIImageView *emailSelectionRadio;
+    __weak IBOutlet UIImageView *smsSelectionRadio;
+    __weak IBOutlet UIImageView *bothSelectionRadio;
+    __weak IBOutlet UITextField *reminderPickerTxt;
+    __weak IBOutlet UIImageView *acceptPromosCheckbox;
+    __weak IBOutlet UIImageView *appointmentsCheckbox;
+    __weak IBOutlet UIImageView *newMsgCheckbox;
+    __weak IBOutlet UIImageView *remindersCheckbox;
+    __weak IBOutlet UIImageView *assoReqChecbox;
+}
+@property (weak, nonatomic) IBOutlet UIView *customSegmentView;
+@property (weak, nonatomic) IBOutlet UILabel *selectedPlanLbl;
+- (IBAction)skipAndContinue:(id)sender;
+- (IBAction)continueClicked:(id)sender;
+@end
+
+@implementation MSANotificationViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Notification";
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,NOTIFICATIONURL]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Notification" requestHeaders:reqHeadDict andRequestParameters:self.securityData inView:self.view];
+    
+    [self createUI];
+}
+
+- (void)createUI {
+    
+    [self createSegmentView];
+    self.selectedPlanLbl.text = [NSString stringWithFormat:@"Selected Plan : %@",self.selectedPlanName];
+    
+    UITapGestureRecognizer *selectNMEmailTap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectNotificationMethod:)];
+    emailSelectionRadio.tag = 101;
+    [emailSelectionRadio addGestureRecognizer:selectNMEmailTap];
+    
+    UITapGestureRecognizer *selectNMSmsTap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectNotificationMethod:)];
+    smsSelectionRadio.tag = 102;
+    [smsSelectionRadio addGestureRecognizer:selectNMSmsTap];
+    
+    UITapGestureRecognizer *selectNMBothTap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectNotificationMethod:)];
+    bothSelectionRadio.tag = 103;
+    [bothSelectionRadio addGestureRecognizer:selectNMBothTap];
+    
+    
+    UITapGestureRecognizer *selectCheckBoxTap1 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectCheckBoxMethod:)];
+    acceptPromosCheckbox.tag = 104;
+    [acceptPromosCheckbox addGestureRecognizer:selectCheckBoxTap1];
+    
+    UITapGestureRecognizer *selectCheckBoxTap2 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectCheckBoxMethod:)];
+    appointmentsCheckbox.tag = 105;
+    [appointmentsCheckbox addGestureRecognizer:selectCheckBoxTap2];
+
+    UITapGestureRecognizer *selectCheckBoxTap3 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectCheckBoxMethod:)];
+    newMsgCheckbox.tag = 106;
+    [newMsgCheckbox addGestureRecognizer:selectCheckBoxTap3];
+    
+    UITapGestureRecognizer *selectCheckBoxTap4 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectCheckBoxMethod:)];
+    remindersCheckbox.tag = 107;
+    [remindersCheckbox addGestureRecognizer:selectCheckBoxTap4];
+    
+    UITapGestureRecognizer *selectCheckBoxTap5 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(selectCheckBoxMethod:)];
+    assoReqChecbox.tag = 108;
+    [assoReqChecbox addGestureRecognizer:selectCheckBoxTap5];
+    
+    [self autofillData];
+    
+}
+
+- (void)autofillData {
+    submitNotificationData = [[NSMutableDictionary alloc]init];
+    // set notification Method data
+    if (![[MSAUtils convertNullToEmptyString:[notificationData objectForKey:@"nm"]] isEqualToString:@""] && [notificationData objectForKey:@"nm"]) {
+        if ([[notificationData objectForKey:@"nm"]isEqualToString:@"email"]) {
+            [emailSelectionRadio setHighlighted:YES];
+        }
+        else if ([[notificationData objectForKey:@"nm"]isEqualToString:@"sms"]) {
+            [smsSelectionRadio setHighlighted:YES];
+        }
+        else if ([[notificationData objectForKey:@"nm"]isEqualToString:@"both"]) {
+            [bothSelectionRadio setHighlighted:YES];
+        }
+    }
+    
+    //reminder hours list
+    if (![[MSAUtils convertNullToEmptyString:[notificationData objectForKey:@"ril"]] isEqualToString:@""] && [notificationData objectForKey:@"ril"]) {
+        reminderHoursArray = [[NSArray alloc]init];
+        reminderHoursArray = [notificationData objectForKey:@"ril"];
+    }
+    else {
+        reminderHoursArray = @[@"1",@"2",@"4",@"8",@"12",@"24"];
+        // temp
+        [submitNotificationData setObject:@"1,2,4,8,12,24" forKey:@"ril"];
+    }
+    
+    // reminder hours selected value
+    if (![[MSAUtils convertNullToEmptyString:[notificationData objectForKey:@"ris"]] isEqualToString:@""] && [notificationData objectForKey:@"ris"]) {
+        reminderHourSelectedValue = [notificationData objectForKey:@"ris"];
+        reminderPickerTxt.text = reminderHourSelectedValue;
+    }
+    
+    
+    // access promos
+    if (![[MSAUtils convertNullToEmptyString:[notificationData objectForKey:@"apo"]] isEqualToString:@""] && [notificationData objectForKey:@"apo"]) {
+        if ([notificationData objectForKey:@"Y"]) {
+            [acceptPromosCheckbox setHighlighted:YES];
+        }
+        else {
+            [acceptPromosCheckbox setHighlighted:NO];
+        }
+    }
+    
+    //['A', 'NM', 'REM', 'ARQ']
+    // receive notification for
+    if (![[MSAUtils convertNullToEmptyString:[notificationData objectForKey:@"rnf"]] isEqualToString:@""] && [notificationData objectForKey:@"rnf"]) {
+        if ([[notificationData objectForKey:@"rnf"] containsObject:@"A"] ) {
+            [appointmentsCheckbox setHighlighted:YES];
+        }
+        if ([[notificationData objectForKey:@"rnf"] containsObject:@"NM"] ) {
+            [newMsgCheckbox setHighlighted:YES];
+        }
+        if ([[notificationData objectForKey:@"rnf"] containsObject:@"REM"] ) {
+            [remindersCheckbox setHighlighted:YES];
+        }
+        if ([[notificationData objectForKey:@"rnf"] containsObject:@"ARQ"] ) {
+            [assoReqChecbox setHighlighted:YES];
+        }
+        
+        
+    }
+    
+}
+- (void)getfilledData {
+     // get notification Method data
+    if ([emailSelectionRadio isHighlighted]) {
+        [submitNotificationData setObject:@"email" forKey:@"nm"];
+    }
+    else if ([smsSelectionRadio isHighlighted]) {
+        [submitNotificationData setObject:@"sms" forKey:@"nm"];
+    }
+    else {
+        [submitNotificationData setObject:@"both" forKey:@"nm"];
+    }
+    if (![reminderPickerTxt.text isEqualToString:@""]) {
+         [submitNotificationData setObject:reminderPickerTxt.text forKey:@"ris"];
+    }
+   
+    
+    if ([acceptPromosCheckbox isHighlighted]) {
+        [submitNotificationData setObject:@"Y" forKey:@"apo"];
+    }
+    else {
+        [submitNotificationData setObject:@"N" forKey:@"apo"];
+
+    }
+    
+    NSMutableArray *receiveNotiArray = [[NSMutableArray alloc]init];
+    if ([appointmentsCheckbox isHighlighted]) {
+        [receiveNotiArray addObject:@"A"];
+    }
+    if ([newMsgCheckbox isHighlighted]) {
+        [receiveNotiArray addObject:@"NM"];
+    }
+    if ([remindersCheckbox isHighlighted]) {
+        [receiveNotiArray addObject:@"REM"];
+    }
+    if ([assoReqChecbox isHighlighted]) {
+        [receiveNotiArray addObject:@"ARQ"];
+    }
+    [submitNotificationData setObject:receiveNotiArray forKey:@"rnf"];
+}
+
+- (void)createSegmentView {
+    
+    UILabel *personalLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    personalLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    personalLbl.text = @"Personal";
+    personalLbl.textColor = kProfileSegmentDefaultFontColor;
+    personalLbl.font = kProfileSegmentFont;
+    personalLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *securityLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    securityLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    securityLbl.text = @"Security";
+    securityLbl.textColor = kProfileSegmentDefaultFontColor;
+    securityLbl.font = kProfileSegmentFont;
+    securityLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *notificationLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    notificationLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    notificationLbl.text = @"Notification";
+    notificationLbl.textColor = kProfileSegmentSelectedFontColor;
+    notificationLbl.font = kProfileSegmentFont;
+    notificationLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UILabel *paymentLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    paymentLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    paymentLbl.text = @"Payment";
+    paymentLbl.textColor = kProfileSegmentDefaultFontColor;
+    paymentLbl.font = kProfileSegmentFont;
+    paymentLbl.textAlignment = NSTextAlignmentCenter;
+    
+    UIView *highlightedView = [[UIView alloc]initWithFrame:CGRectZero];
+    highlightedView.translatesAutoresizingMaskIntoConstraints = NO;
+    highlightedView.backgroundColor = kProfileSegmentSelectedFontColor;
+    [notificationLbl addSubview:highlightedView];
+    
+    if (self.selectedPlanId.integerValue != 1) {
+        [self.customSegmentView addSubview:personalLbl];
+        [self.customSegmentView addSubview:securityLbl];
+        [self.customSegmentView addSubview:notificationLbl];
+        [self.customSegmentView addSubview:paymentLbl];
+        
+        NSDictionary *views = @{@"personalLbl":personalLbl,@"securityLbl":securityLbl,@"notificationLbl":notificationLbl,@"paymentLbl":paymentLbl};
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[personalLbl(==securityLbl)]-[securityLbl(==paymentLbl)]-[notificationLbl]-[paymentLbl(==securityLbl)]-|" options:0 metrics:nil views:views]];
+        
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[personalLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[securityLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[notificationLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[paymentLbl]|" options:0 metrics:nil views:views]];
+        
+    }
+    else {
+        [self.customSegmentView addSubview:personalLbl];
+        [self.customSegmentView addSubview:securityLbl];
+        [self.customSegmentView addSubview:notificationLbl];
+        NSDictionary *views = @{@"personalLbl":personalLbl,@"securityLbl":securityLbl,@"notificationLbl":notificationLbl};
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[personalLbl(==securityLbl)]-[securityLbl(==notificationLbl)]-[notificationLbl]-|" options:0 metrics:nil views:views]];
+        
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[personalLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[securityLbl]|" options:0 metrics:nil views:views]];
+        [self.customSegmentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[notificationLbl]|" options:0 metrics:nil views:views]];
+        
+        
+    }
+    
+    [notificationLbl addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[highlightedView(2)]|" options:0 metrics:nil views:@{@"highlightedView":highlightedView}]];
+    [notificationLbl addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[highlightedView]|" options:0 metrics:nil views:@{@"highlightedView":highlightedView}]];
+    
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
+        NSLog(@"Got Notification Data");
+        notificationData = [NSMutableDictionary dictionaryWithDictionary:responseDict];
+    }
+    else {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+        [self.navigationController popViewControllerAnimated:NO];
+    }
+    
+}
+
+-(void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+
+#pragma mark - Selector methods
+
+-(void)selectNotificationMethod:(id)sender {
+    UIImageView *imageViewTapped = (UIImageView *)[sender view];
+    if (imageViewTapped.tag == 101) {
+        if (![imageViewTapped isHighlighted]) {
+            [imageViewTapped setHighlighted:YES];
+            if ([smsSelectionRadio isHighlighted]) {
+                [smsSelectionRadio setHighlighted:NO];
+            }
+            else {
+                [bothSelectionRadio setHighlighted:NO];
+            }
+        }
+    }
+    else if (imageViewTapped.tag == 102) {
+        if (![imageViewTapped isHighlighted]) {
+            [imageViewTapped setHighlighted:YES];
+            if ([emailSelectionRadio isHighlighted]) {
+                [emailSelectionRadio setHighlighted:NO];
+            }
+            else {
+                [bothSelectionRadio setHighlighted:NO];
+            }
+        }
+    }
+    else {
+        if (![imageViewTapped isHighlighted]) {
+            [imageViewTapped setHighlighted:YES];
+            if ([emailSelectionRadio isHighlighted]) {
+                [emailSelectionRadio setHighlighted:NO];
+            }
+            else {
+                [smsSelectionRadio setHighlighted:NO];
+            }
+        }
+    }
+    
+    
+}
+
+-(void)selectCheckBoxMethod:(id)sender {
+    UIImageView *imageViewTapped = (UIImageView *)[sender view];
+    if ([imageViewTapped isHighlighted]) {
+        [imageViewTapped setHighlighted:NO];
+    }
+    else {
+        [imageViewTapped setHighlighted:YES];
+    }
+    
+}
+
+#pragma mark actionMethods
+
+- (IBAction)skipAndContinue:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:nil];
+
+}
+
+- (IBAction)continueClicked:(id)sender {
+    [self getfilledData];
+    // testing
+
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,@"rest/S31"]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Payment" requestHeaders:reqHeadDict andRequestParameters:submitNotificationData inView:self.view];
+    
+}
+@end

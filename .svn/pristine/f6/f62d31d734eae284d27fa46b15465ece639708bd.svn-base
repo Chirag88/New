@@ -1,0 +1,21 @@
+//
+//  MSAComparePlanViewController.h
+//  MySchapp
+//
+//  Created by CK-Dev on 3/11/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface MSAComparePlanViewController : UIViewController<UITableViewDataSource, UITableViewDelegate>
+
+@property (nonatomic, weak) IBOutlet UITableView *featureList;
+@property (nonatomic, strong) NSMutableArray *plansAvailable;
+@property (nonatomic, weak) IBOutlet UIButton *plan1;
+@property (nonatomic, weak) IBOutlet UIButton *plan2;
+
+- (IBAction)selectPlan1:(id)sender;
+- (IBAction)selectPlan2:(id)sender;
+
+@end

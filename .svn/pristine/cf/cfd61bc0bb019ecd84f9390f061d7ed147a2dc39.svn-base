@@ -1,0 +1,136 @@
+//
+//  ForgotPasswordViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 20/04/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAForgotPasswordViewController.h"
+#import "MSAUtils.h"
+#import "MSAConstants.h"
+#import "MSANetworkHandler.h"
+
+@interface MSAForgotPasswordViewController (){
+    UILabel *answerSecurityLbl;
+    UILabel *questionLbl;
+    UITextField *answerTxt;
+    UIButton *submitButton;
+}
+
+@end
+
+@implementation MSAForgotPasswordViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.view.backgroundColor = [UIColor whiteColor];
+    [MSAUtils setNavigationBarAttributes:self.navigationController];
+    
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Forgot Password";
+    
+    [self setupUI];
+}
+
+- (void)setupUI {
+    answerSecurityLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    answerSecurityLbl.text = @"Answer the security question below and submit.";
+    answerSecurityLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    answerSecurityLbl.textAlignment = NSTextAlignmentCenter;
+    answerSecurityLbl.numberOfLines = 3;
+    [self.view addSubview:answerSecurityLbl];
+    
+    questionLbl = [[UILabel alloc]initWithFrame:CGRectZero];
+    questionLbl.text = self.question;
+    questionLbl.backgroundColor = kProfileRowBackColor;
+    questionLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    questionLbl.numberOfLines = 2;
+    [self.view addSubview:questionLbl];
+    
+    answerTxt = [[UITextField alloc]initWithFrame:CGRectZero];
+    answerTxt.translatesAutoresizingMaskIntoConstraints = NO;
+    answerTxt.placeholder = @"Answer to security question";
+    answerTxt.borderStyle = UITextBorderStyleRoundedRect;
+    [self.view addSubview:answerTxt];
+    
+    submitButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    submitButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [submitButton setTitle:@"Submit Answer" forState:UIControlStateNormal];
+    [submitButton addTarget:self action:@selector(submitSecurityQuestion:) forControlEvents:UIControlEventTouchUpInside];
+    submitButton.backgroundColor = kProfileContinueBtnColor;
+    submitButton.layer.cornerRadius = 5;
+    [submitButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.view addSubview:submitButton];
+    
+    [self applyConstraints];
+    
+}
+
+- (void)applyConstraints {
+    NSDictionary *views = @{@"answerSecurityLbl":answerSecurityLbl,@"questionLbl":questionLbl,@"answerTxt":answerTxt,@"submitButton":submitButton};
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-50-[answerSecurityLbl(60)]-20-[questionLbl(60)]-20-[answerTxt(40)]-30-[submitButton(40)]" options:0 metrics:nil views:views]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:answerSecurityLbl attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.9 constant:0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:answerSecurityLbl attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:questionLbl attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.9 constant:0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:questionLbl attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:answerTxt attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.9 constant:0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:answerTxt attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:submitButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:submitButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    
+    
+}
+
+- (void)submitSecurityQuestion:(id)sender {
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,FORGOTPASSSECUIRTYURL]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *requestDict = @{@"sq":questionLbl.text,@"answer":answerTxt.text,@"email":self.emailId};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"SubmitSecurityAnswer" requestHeaders:nil andRequestParameters:requestDict inView:self.view];
+
+    
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"] && [requestId isEqualToString:@"SubmitSecurityAnswer"]) {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+        
+    }
+    else {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+    }
+    
+    
+    
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

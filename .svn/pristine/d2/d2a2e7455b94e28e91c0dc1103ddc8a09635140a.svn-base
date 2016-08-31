@@ -1,0 +1,52 @@
+//
+//  MSAPlanViewContoller.m
+//  MySchapp
+//
+//  Created by CK-Dev on 10/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAPlanViewContoller.h"
+#import "MSAPlanTableViewCell.h"
+
+@implementation MSAPlanViewContoller
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Plans";
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+#pragma mark TableView Delegates
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 5;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    static NSString *CellIdentifier = @"MSAPlanTableViewCell";
+    
+    MSAPlanTableViewCell *cell = (MSAPlanTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = (MSAPlanTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSAPlanTableViewCell" owner:self options:nil] objectAtIndex:0];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return cell;
+}
+
+
+- (IBAction)comparePlans:(id)sender
+{
+    
+}
+
+@end

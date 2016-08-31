@@ -1,0 +1,104 @@
+//
+//  MSAPaymentViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 20/04/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAPaymentViewController.h"
+#import "MSAConstants.h"
+#import "MSANetworkHandler.h"
+#import "MSAUtils.h"
+
+@interface MSAPaymentViewController ()<MSANetworkDelegate>
+
+@end
+
+@implementation MSAPaymentViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    [self createUI];
+    
+    
+}
+
+- (void)createUI {
+    UIButton *makePayment = [UIButton buttonWithType:UIButtonTypeCustom];
+    [makePayment setTitle:@"Make Payment" forState:UIControlStateNormal];
+    [makePayment setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    makePayment.backgroundColor = kMySchappMediumBlueColor;
+    makePayment.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:makePayment];
+    
+    [makePayment addTarget:self action:@selector(makePaymentClicked:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:makePayment attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:makePayment attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:45]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:makePayment attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:makePayment attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+    
+    
+}
+
+- (void)makePaymentClicked:(id)sender {
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,@"rest/S32"]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    NSDictionary *requestParameters = @{@"hPlan":@"Y",@"totalAmount": [self.paymentDetails objectForKey:@"totalAmount"],@"subTotal": [self.paymentDetails objectForKey:@"subTotal"],@"tax": [self.paymentDetails objectForKey:@"tax"],@"paymentConfirmationId": @"daskjdhksjdhsk"};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"PaidPlanPayment" requestHeaders:reqHeadDict andRequestParameters:requestParameters inView:self.view];
+
+}
+
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
+        NSLog(@"Payment successful");
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setValue:[responseDict objectForKey:kUserRole] forKey:kDefaultsUserRole];
+        [userDefaults setValue:[responseDict objectForKey:kRefreshToken] forKey:kDefaultsRefreshToken];
+        [userDefaults setValue:[responseDict objectForKey:kAccessToken] forKey:kDefaultsAccessToken];
+//        [userDefaults setValue:self.selectedPlanId forKey:kDefaultsPID];
+//        [userDefaults setValue:self.selectedPlanName forKey:kDefaultsPName];
+//        // reset from the service data
+        [userDefaults setValue:[NSNumber numberWithInteger:2999] forKey:kDefaultsAccessTokenExpiresIn];
+        [userDefaults setValue:[NSNumber numberWithInteger:86400] forKey:kDefaultsRefreshTokenExpiresIn];
+        [userDefaults synchronize];
+        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+        
+    }
+    else {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+    }
+    
+    
+    
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

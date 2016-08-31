@@ -1,0 +1,403 @@
+//
+//  MSASearchViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSASearchViewController.h"
+
+#define SEARCH_BASE_COLOR   [UIColor colorWithRed:12.0/255 green:129.0/255 blue:198.0/255 alpha:1.0]
+#define BTN_BACK_COLOR      [UIColor colorWithRed:162.0/255 green:162.0/255 blue:162.0/255 alpha:1.0]
+#define BTN_ADD_COLOR       [UIColor colorWithRed:45.0/255 green:161.0/255 blue:0/255 alpha:1.0]
+
+#define ROW_HEIGHT_NORMAL   44.0
+
+#define TABLE_SEARCH_TAG        200
+#define TABLE_PRODUCT_TIMELINE  201
+
+#define SEARCH_BAR_PLACEHOLDER_STRING  @"Search within 10 Miles"
+#define SEARCH_RESULT_ZERO_MSG         @"No results found, please try again."
+
+
+@interface MSASearchViewController () {
+    NSTimer *searchTimer;
+}
+
+@property (nonatomic, strong) UIImageView *logoImageView;
+@property (nonatomic, strong) UIButton *drawerBtn;
+
+@property(nonatomic,strong) UIView *searchBarBaseView;
+@property(nonatomic,strong) UIView *baseSearchView;
+
+@property(nonatomic,strong) UIView *tblBaseView;
+@property(nonatomic,strong) UITableView *tblSearchResult;
+@property(nonatomic,strong) UILabel *searchResultMsg;
+
+@property(nonatomic,strong) UIView *resultDetailBaseView;
+@property(nonatomic,strong) UITableView *tblSearchResultDetails;
+@property(nonatomic,strong) UIView *searchDetailView;
+
+@property(nonatomic,strong) NSMutableArray *productContracts;
+
+@property(nonatomic,strong) NSIndexPath *selectedIndex;
+
+@end
+
+@implementation MSASearchViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.view.clipsToBounds = YES;
+    self.view.backgroundColor = [UIColor colorWithRed:1.0/255 green:1.0/255 blue:1.0/255 alpha:0.5];
+
+    [self setupCustomViews];
+
+}
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    if([[touches anyObject] view] == self.baseSearchView) {
+        self.globalSearchBar.text = @"";
+        self.searchResultProducts = nil;
+        self.productContracts = nil;
+        [self.globalSearchBar resignFirstResponder];
+        [self.delegate expandSearchResultView:NO];
+        self.globalSearchBar.userInteractionEnabled = YES;
+    }
+}
+#pragma mark - Setup UISearchBar
+
+-(void)setupCustomViews
+{
+    self.searchBarBaseView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
+    self.searchBarBaseView.backgroundColor = SEARCH_BASE_COLOR;
+    
+    self.globalSearchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(50, 20, self.view.frame.size.width-50, 44)];
+    self.globalSearchBar.placeholder = SEARCH_BAR_PLACEHOLDER_STRING;
+    self.globalSearchBar.delegate = self;
+    self.globalSearchBar.searchBarStyle = UISearchBarStyleMinimal;
+    [self.searchBarBaseView addSubview:self.globalSearchBar];
+    
+    self.logoImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 20, 25, 25)];
+    self.logoImageView.image = [UIImage imageNamed:@"logo.png"];
+    [self.searchBarBaseView addSubview:self.logoImageView];
+    
+    self.drawerBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    self.drawerBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.drawerBtn setBackgroundImage:[UIImage imageNamed:@"close.png"] forState:UIControlStateNormal];
+    [self.searchBarBaseView addSubview:self.drawerBtn];
+    
+    [self.globalSearchBar setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.logoImageView setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+    [self.view addSubview:self.searchBarBaseView];
+    
+    [self.searchBarBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-20-[globalSearchBar]" options:0 metrics:nil views:@{@"globalSearchBar":self.globalSearchBar}]];
+    [self.searchBarBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5.0-[logoImageView(25.0)]-0-[globalSearchBar]-|" options:0 metrics:nil views:@{@"logoImageView":self.logoImageView,@"globalSearchBar":self.globalSearchBar}]];
+    [self.searchBarBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[logoImageView(25.0)]" options:0 metrics:nil views:@{@"logoImageView":self.logoImageView}]];
+    [self.searchBarBaseView addConstraint:[NSLayoutConstraint constraintWithItem:self.logoImageView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.searchBarBaseView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:10]];
+
+}
+
+#pragma mark - UITableViewDataSource
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if(tableView==self.tblSearchResult) {
+        if(self.searchResultProducts.count==0)
+            self.searchResultMsg.text = SEARCH_RESULT_ZERO_MSG;
+        return self.searchResultProducts.count;
+    }
+    else {
+        return self.productContracts.count;
+    }
+}
+
+-(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cellId"];
+    if(cell==nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cellId"];
+    }
+    
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.backgroundColor = SEARCH_BASE_COLOR;
+    
+    return cell;
+}
+
+#pragma mark - UITableViewDelegate
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if(tableView == self.tblSearchResult) {
+        self.selectedIndex = indexPath;
+        self.globalSearchBar.text = @"";
+        [self.globalSearchBar resignFirstResponder];
+        self.globalSearchBar.userInteractionEnabled = NO;
+        [self.tblSearchResult deselectRowAtIndexPath:indexPath animated:YES];
+        
+        NSDictionary *selectedobject = [self.searchResultProducts objectAtIndex:indexPath.row];
+        
+        NSString *url = [NSString stringWithFormat:@""];
+        NSURL *requestUrl = [NSURL URLWithString:url];
+        NSURLRequest *request = [NSURLRequest requestWithURL:requestUrl];
+        AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:request];
+        operation.responseSerializer = [AFJSONResponseSerializer serializer];
+        
+        [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+            //[self loadtablewithobjects];
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error");
+        }];
+        
+        [operation start];
+
+
+    }
+    else {
+        //TODO: A contract is selected. Maintain the order.
+    }
+}
+
+#pragma mark - UISearchBarDelegate
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
+{
+    if(![searchText isEqualToString:@""]) {
+        [searchTimer invalidate];
+        searchTimer = nil;
+        searchTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(searchProduct:) userInfo:searchText repeats:NO];
+    }
+    else {
+        self.searchResultProducts = nil;
+        self.productContracts = nil;
+        [self.tblSearchResult reloadData];
+    }
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
+{
+    [self.delegate expandSearchResultView:YES];
+
+    [self presentSearchResultView];
+}
+
+#pragma mark - Utility Methods
+
+-(void)publishMessage:(NSString*)msg
+{
+    self.searchResultMsg.text = msg;
+}
+
+- (void)searchProduct:(NSTimer *)timer
+{
+    NSString *url = [NSString stringWithFormat:@"http://www.cmegroup.com/CmeWS/mvc/ProductSlate/V2/List?sortField=rank&sortAsc=false&cleared=Futures&searchString=%@",timer.userInfo];
+    NSURL *requestUrl = [NSURL URLWithString:url];
+    NSURLRequest *request = [NSURLRequest requestWithURL:requestUrl];
+    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:request];
+    operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    
+    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        [self loadTableDataForSearchResult:[responseObject objectForKey:@"products"]];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+    }];
+    
+    [operation start];
+}
+
+-(CGFloat)getTableHeightForRows:(NSInteger)rowCount
+{
+    CGFloat maxTableHeight = (ROW_HEIGHT_NORMAL*rowCount > 220) ? 220:ROW_HEIGHT_NORMAL*rowCount;
+    return maxTableHeight;
+}
+
+
+#pragma mark - Search Products Functionality
+
+-(void)presentSearchResultView
+{
+    self.baseSearchView = [[UIView alloc] initWithFrame:CGRectMake(0, 64, self.view.frame.size.width, self.view.frame.size.height)];
+    self.baseSearchView.backgroundColor = [UIColor clearColor];
+    
+    self.tblBaseView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, ROW_HEIGHT_NORMAL*5)];
+    self.tblBaseView.backgroundColor = SEARCH_BASE_COLOR;
+    [self.baseSearchView addSubview:self.tblBaseView];
+    
+    if(self.searchResultProducts.count>0) {
+        CGFloat maxTableHeight = [self getTableHeightForRows:self.searchResultProducts.count];
+        self.tblSearchResult = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, maxTableHeight) style:UITableViewStylePlain];
+        self.tblSearchResult.tag = TABLE_SEARCH_TAG;
+        self.tblSearchResult.delegate = self;
+        self.tblSearchResult.dataSource = self;
+        [self.tblBaseView addSubview:self.tblSearchResult];
+    }
+    else {
+        self.searchResultMsg = [[UILabel alloc] initWithFrame:CGRectMake(40, 80, 300, 30)];
+        self.searchResultMsg.text = @"Enter a product code or name above";
+        self.searchResultMsg.textColor = [UIColor whiteColor];
+        self.searchResultMsg.numberOfLines = 1;
+        [self.tblBaseView addSubview:self.searchResultMsg];
+        self.searchResultMsg.adjustsFontSizeToFitWidth = YES;
+        
+        [self.searchResultMsg setTranslatesAutoresizingMaskIntoConstraints:NO];
+        [self.tblBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-30-[searchResultMsg]-30-|" options:0 metrics:nil views:@{@"searchResultMsg":self.searchResultMsg}]];
+        [self.tblBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-70-[searchResultMsg]" options:0 metrics:nil views:@{@"searchResultMsg":self.searchResultMsg}]];
+
+    }
+
+    [self.view addSubview:self.baseSearchView];
+}
+
+-(void)presentSearchDetailViewForIndexPath:(NSIndexPath*)indexPath
+{
+    CGFloat tableHeight = (ROW_HEIGHT_NORMAL*self.productContracts.count > 132) ? 132:ROW_HEIGHT_NORMAL*self.productContracts.count;
+    
+    self.resultDetailBaseView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, tableHeight+2*ROW_HEIGHT_NORMAL)];
+    self.resultDetailBaseView.backgroundColor = SEARCH_BASE_COLOR;
+    
+    UIView *vwColorIndicator = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, ROW_HEIGHT_NORMAL)];
+    vwColorIndicator.backgroundColor = [UIColor cyanColor];
+    [self.resultDetailBaseView addSubview:vwColorIndicator];
+    
+    UILabel *lblProductName = [[UILabel alloc] initWithFrame:CGRectMake(vwColorIndicator.frame.size.width, 0, self.view.frame.size.width-vwColorIndicator.frame.size.width, ROW_HEIGHT_NORMAL)];
+    lblProductName.backgroundColor = SEARCH_BASE_COLOR;
+    lblProductName.textColor = [UIColor whiteColor];
+    NSString *productTitle = [[[self.searchResultProducts objectAtIndex:indexPath.row] valueForKey:@"globex"] stringByAppendingFormat:@" - %@",[[self.searchResultProducts objectAtIndex:indexPath.row] valueForKey:@"name"]];
+    lblProductName.text = productTitle;
+    [self.resultDetailBaseView addSubview:lblProductName];
+    
+    [lblProductName setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [vwColorIndicator setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    /*[self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:vwColorIndicator attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeLeading multiplier:1.0 constant:0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:vwColorIndicator attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeWidth multiplier:1.0 constant:5.0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:vwColorIndicator attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1.0 constant:44.0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:vwColorIndicator attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0]];*/
+    
+    [self.resultDetailBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[vwColorIndicator(5.0)]" options:0 metrics:nil views:@{@"vwColorIndicator":vwColorIndicator}]];
+    [self.resultDetailBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[vwColorIndicator(44.0)]" options:0 metrics:nil views:@{@"vwColorIndicator":vwColorIndicator}]];
+    
+    
+    /*[self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:lblProductName attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:vwColorIndicator attribute:NSLayoutAttributeTrailing multiplier:1.0 constant:10.0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:lblProductName attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTrailing multiplier:1.0 constant:0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:lblProductName attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1.0 constant:44.0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:lblProductName attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0]];*/
+    
+    [self.resultDetailBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[lblProductName]-|" options:0 metrics:nil views:@{@"lblProductName":lblProductName}]];
+    [self.resultDetailBaseView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[lblProductName(44.0)]" options:0 metrics:nil views:@{@"lblProductName":lblProductName}]];
+
+    
+    
+    self.tblSearchResultDetails = [[UITableView alloc] initWithFrame:CGRectMake(0, ROW_HEIGHT_NORMAL+1, self.view.frame.size.width, tableHeight)];
+    self.tblSearchResultDetails.tag = TABLE_PRODUCT_TIMELINE;
+    self.tblSearchResultDetails.delegate = self;
+    self.tblSearchResultDetails.dataSource = self;
+    [self.resultDetailBaseView addSubview:self.tblSearchResultDetails];
+    
+    UIButton *btnCancel = [[UIButton alloc] initWithFrame:CGRectMake(40, ROW_HEIGHT_NORMAL+tableHeight+8, 60, 28)];
+    btnCancel.layer.cornerRadius = 4.0;
+    [btnCancel addTarget:self action:@selector(cancelAction:) forControlEvents:UIControlEventTouchUpInside];
+    btnCancel.tag = 100;
+    [btnCancel setTitle:@"Back" forState:UIControlStateNormal];
+    btnCancel.backgroundColor = BTN_BACK_COLOR;
+    [self.resultDetailBaseView addSubview:btnCancel];
+    
+    [btnCancel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnCancel attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTrailing multiplier:0.5 constant:-30]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnCancel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTop multiplier:1 constant:tableHeight+ROW_HEIGHT_NORMAL+8]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnCancel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeWidth multiplier:1 constant:80]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnCancel attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:28]];
+    
+    
+    
+    UIButton *btnAdd = [[UIButton alloc] initWithFrame:CGRectMake(40, ROW_HEIGHT_NORMAL+tableHeight+8, 60, 28)];
+    btnAdd.layer.cornerRadius = 4.0;
+    [btnAdd addTarget:self action:@selector(addProductToPortfolio:) forControlEvents:UIControlEventTouchUpInside];
+    btnAdd.tag = 101;
+    [btnAdd setTitle:@"Add" forState:UIControlStateNormal];
+    btnAdd.backgroundColor = BTN_ADD_COLOR;
+    [self.resultDetailBaseView addSubview:btnAdd];
+    
+    [btnAdd setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnAdd attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTrailing multiplier:0.5 constant:30]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnAdd attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.resultDetailBaseView attribute:NSLayoutAttributeTop multiplier:1 constant:tableHeight+ROW_HEIGHT_NORMAL+8]];
+    
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnAdd attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:btnCancel attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
+    [self.resultDetailBaseView addConstraint:[NSLayoutConstraint constraintWithItem:btnAdd attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:btnCancel attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
+    
+    
+    
+    [self.tblBaseView addSubview:self.resultDetailBaseView];
+    
+}
+
+-(void)manageSearchViewsTransition:(NSInteger)push forIndexPath:(NSIndexPath*)indexPath
+{
+    if(push==1) {
+        //--> Forward Navigation - Move to product timeline view
+        [self.tblSearchResult removeFromSuperview];
+        self.tblSearchResult = nil;
+        
+        [self presentSearchDetailViewForIndexPath:indexPath];
+    }
+    else {
+        //--> Backward Navigation - Move to product list view
+        [self.resultDetailBaseView removeFromSuperview];
+        self.resultDetailBaseView = nil;
+        self.globalSearchBar.userInteractionEnabled = YES;
+
+        [self presentSearchResultView];
+    }
+}
+
+
+-(void)cancelAction:(id)sender
+{
+    UIButton *btn = (UIButton*)sender;
+    self.selectedIndex = nil;
+    if(btn.tag == 100) {
+        [self manageSearchViewsTransition:0 forIndexPath:nil];
+    }
+    else {
+        [self manageSearchViewsTransition:0 forIndexPath:nil];
+    }
+}
+
+-(void)loadTableDataForSearchResult:(NSArray*)searchResult
+{
+    if(self.searchResultProducts!=nil)
+        self.searchResultProducts = nil;
+
+    self.searchResultProducts = [[NSMutableArray alloc] init];
+    if(searchResult!=(NSArray*)[NSNull null])
+    {
+        if(searchResult.count>0) {
+            for(NSInteger counter = 0; counter < searchResult.count; counter++) {
+                //[self.searchResultProducts addObject:obj];
+            }
+        }
+    }
+    else {
+        [self publishMessage:@"Something went wrong. Response is null"];
+    }
+
+    [self presentSearchResultView];
+    [self.tblSearchResult reloadData];
+    [self.globalSearchBar resignFirstResponder];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

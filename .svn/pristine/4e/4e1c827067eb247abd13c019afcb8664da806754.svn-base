@@ -1,0 +1,76 @@
+//
+//  MSASecurityViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 25/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSASecurityViewController.h"
+#import "MSAConstants.h"
+#import "MSANetworkHandler.h"
+#import "MSAUtils.h"
+
+@interface MSASecurityViewController ()<MSANetworkDelegate>
+{
+    NSMutableDictionary *securityData;
+}
+@end
+
+@implementation MSASecurityViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Security";
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,SECURITYURL]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Security" requestHeaders:reqHeadDict andRequestParameters:self.personalData inView:self.view];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
+        NSLog(@"Got security Data");
+        securityData = [NSMutableDictionary dictionaryWithDictionary:responseDict];
+    }
+    else {
+        [MSAUtils showAlertWithTitle:kAlertMessageTitle message:[responseDict valueForKey:@"rMsg"] cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+    }
+    
+}
+
+-(void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,18 @@
+//
+//  MSAAssociationTableViewCell.h
+//  MySchapp
+//
+//  Created by CK-Dev on 04/30/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface MSAAssociationTableViewCell : UITableViewCell
+
+@property (nonatomic, weak) IBOutlet UILabel *fromLabel;
+@property (nonatomic, weak) IBOutlet UILabel *typeLabel;
+@property (nonatomic, weak) IBOutlet UIImageView *radioImage;
+
+
+@end

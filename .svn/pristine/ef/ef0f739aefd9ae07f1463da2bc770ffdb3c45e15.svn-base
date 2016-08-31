@@ -1,0 +1,99 @@
+//
+//  MSAOTPViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 3/9/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAOTPViewController.h"
+#import "MSAConstants.h"
+#import "MSAOTPSuccessViewController.h"
+#import "MSAOTPFailureViewController.h"
+#import "MSAUtils.h"
+
+@interface MSAOTPViewController ()
+
+@end
+
+@implementation MSAOTPViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    NSString *emailId = [self.signupDict valueForKey:@"email"];
+    NSArray *components = [emailId componentsSeparatedByString:@"@"];
+    NSString *firstComp = [components firstObject];
+    NSString *emailToShow = [NSString stringWithFormat:@"xxxx%@@%@",[firstComp substringWithRange:NSMakeRange(firstComp.length-4, 4)],[components lastObject]];
+    self.otpLbl.text = [NSString stringWithFormat:@"Enter the one time password (OTP), we have sent to your Email ID %@",emailToShow];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)openThanksAndLoginPage
+{
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSAOTPSuccessViewController *controller = (MSAOTPSuccessViewController*)[mainStoryboard
+                                                               instantiateViewControllerWithIdentifier: @"MSAOTPSuccessViewController"];
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+- (void)openInvalidOTPPage
+{
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSAOTPFailureViewController *controller = (MSAOTPFailureViewController*)[mainStoryboard
+                                                                             instantiateViewControllerWithIdentifier: @"MSAOTPFailureViewController"];
+    controller.signupDict = self.signupDict;
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+- (IBAction)verifyOTP:(id)sender
+{
+    //call otp service
+    NSDictionary *requestJSON = [[NSDictionary alloc] initWithObjectsAndKeys:[self.signupDict valueForKey:@"email"],@"email",self.otpField.text,@"otp", nil];
+    
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    if (_isComingFromForgotPass) {
+         [networkHanlder createRequestForURLString:[NSString stringWithFormat:@"%@%@",BASEURL,FORGOTPASSSECUIRTYURL] withIdentifier:@"ForgotPassOTP" requestHeaders:nil andRequestParameters:requestJSON inView:self.view];
+    }
+    else {
+        [networkHanlder createRequestForURLString:[NSString stringWithFormat:@"%@%@",BASEURL,VERIFYOTPURL] withIdentifier:@"SignUPOTP" requestHeaders:nil andRequestParameters:requestJSON inView:self.view];
+    }
+    
+   
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    if ([[responseDict objectForKey:@"rCode"] isEqualToString:@"00"] && [requestId isEqualToString:@"SignUPOTP"]) {
+        //successfully verified page
+        [self openThanksAndLoginPage];
+    }
+    else if ([[responseDict objectForKey:@"rCode"] isEqualToString:@"00"] && [requestId isEqualToString:@"ForgotPassOTP"]) {
+        // Open Change Password Screen
+    }
+    else {
+        UIAlertView *alert  = [[UIAlertView alloc]initWithTitle:@"Message" message:[responseDict objectForKey:@"rMsg"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] ;
+        [alert show];
+    }
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+     [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+    
+}
+
+
+
+
+@end

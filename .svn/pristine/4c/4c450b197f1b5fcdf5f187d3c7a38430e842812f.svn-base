@@ -1,0 +1,65 @@
+//
+//  MSASplashViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSASplashViewController.h"
+#import "MSALandingPageViewController.h"
+#import "MSAConstants.h"
+
+
+@interface MSASplashViewController ()
+{
+    UIActivityIndicatorView *activityIndicator;
+}
+@end
+
+@implementation MSASplashViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden  = YES;
+    
+    activityIndicator = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    activityIndicator.center = self.view.center;
+    
+    [self.view addSubview:activityIndicator];
+    [activityIndicator startAnimating];
+    [self performSelector:@selector(stopAnimation) withObject:self afterDelay:2.0];
+                                                  
+}
+
+-(void)stopAnimation {
+    [activityIndicator stopAnimating];
+    
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSALandingPageViewController *controller = (MSALandingPageViewController*)[mainStoryboard
+                                                       instantiateViewControllerWithIdentifier: @"LandingPageController"];
+    
+//    self.view.window.rootViewController = controller;
+//    [self.view.window addSubview:controller.view];
+//    
+//    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController pushViewController:controller animated:NO];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

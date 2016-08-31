@@ -1,0 +1,217 @@
+//
+//  MSALoginViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSALoginViewController.h"
+#import "MSASignupViewController.h"
+#import "MSAConstants.h"
+#import "MSACountrySelectViewController.h"
+#import "MSAUtils.h"
+
+@interface MSALoginViewController ()<NSURLSessionDelegate>
+@property (weak, nonatomic) IBOutlet UIButton *forgotPwdBtn;
+@property (weak, nonatomic) IBOutlet TTTAttributedLabel *signupMessage;
+- (IBAction)closeClicked:(id)sender;
+@property (weak, nonatomic) IBOutlet UIButton *closeBtn;
+- (IBAction)loginClicked:(id)sender;
+
+@end
+
+@implementation MSALoginViewController
+
+- (void)viewDidLoad {
+    self.emailField.text = @"c.khatter1988@gmail.com";
+    self.pwdField.text = @"Pass@123";
+    [super viewDidLoad];
+    [self addAttributesToTextFields];
+    // Do any additional setup after loading the view.
+    NSMutableAttributedString *titleString = [[NSMutableAttributedString alloc] initWithString:@"Forgot your password?"];
+    // making text property to underline text-
+    [titleString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInteger:(NSUnderlinePatternDot|NSUnderlineStyleSingle)] range:NSMakeRange(0, [titleString length])];
+    [titleString addAttribute:NSForegroundColorAttributeName value:[UIColor darkGrayColor] range:NSMakeRange(0, [titleString length])];
+    [titleString addAttribute:NSUnderlineColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, [titleString length])];
+    // using text on button
+    [self.forgotPwdBtn setAttributedTitle: titleString forState:UIControlStateNormal];
+    
+    self.signupMessage.delegate = self;
+    NSURL *tncUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://google.com/%@", @""]];
+    [self.signupMessage addLinkToURL:tncUrl withRange:NSMakeRange(28, 6)];
+    
+    [self.view bringSubviewToFront:self.closeBtn];
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden = YES;
+}
+
+- (void)addAttributesToTextFields
+{
+    UIImageView *leftViewEmailImg = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 20, 20)];
+    leftViewEmailImg.image = [UIImage imageNamed:@"icon_emailInactive.png"];
+    leftViewEmailImg.contentMode = UIViewContentModeScaleAspectFit;
+    UIView *leftViewEmail = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+    [leftViewEmail addSubview:leftViewEmailImg];
+    self.emailField.leftView = leftViewEmail;
+    self.emailField.leftViewMode = UITextFieldViewModeAlways;
+    
+    UIImageView *leftViewPwdImg = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 20, 20)];
+    leftViewPwdImg.image = [UIImage imageNamed:@"login_iconInactive_password.png"];
+    leftViewPwdImg.contentMode = UIViewContentModeScaleAspectFit;
+    UIView *leftViewPwd = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+    [leftViewPwd addSubview:leftViewPwdImg];
+    self.pwdField.leftView = leftViewPwd;
+    self.pwdField.leftViewMode = UITextFieldViewModeAlways;
+}
+
+#pragma mark - TTTAttributedLabelDelegate
+
+- (void)attributedLabel:(__unused TTTAttributedLabel *)label
+   didSelectLinkWithURL:(NSURL *)url {
+    NSLog(@"clicked");
+    
+    [self.loginDelegate controllerGotDissmissed:self];
+
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+- (IBAction)closeClicked:(id)sender {
+   
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+- (IBAction)loginClicked:(id)sender {
+    
+    NSString *urlString = [NSString stringWithFormat:@"%@?username=%@&password=%@&client_id=%@&client_secret=%@&grant_type=%@&scope=%@",[NSString stringWithFormat:@"%@%@",BASE_URL,REFRESHTOKENLOGINURL],self.emailField.text,self.pwdField.text,kLoginServiceClientID,kLoginServiceClientSecret,kLoginServiceGrantType,kLoginServiceScope];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Login" andRequestParameters:nil inView:self.view];
+    
+    /*
+    if (![self.emailField.text isEqualToString:@""]) {
+        if(![self.pwdField.text isEqualToString:@""]) {
+            
+            BOOL isEmailValid = [MSAUtils validateEmail:self.emailField.text];
+            if (!isEmailValid) {
+                NSString *urlString = [NSString stringWithFormat:@"%@?username=%@&password=%@&client_id=%@&client_secret=%@&grant_type=%@&scope=%@",[NSString stringWithFormat:@"%@%@",BASE_URL,REFRESHTOKENLOGINURL],self.emailField.text,self.pwdField.text,kLoginServiceClientID,kLoginServiceClientSecret,kLoginServiceGrantType,kLoginServiceScope];
+                MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+                networkHanlder.delegate = self;
+                [networkHanlder createRequestForURLString:urlString withIdentifier:@"Login" andRequestParameters:nil inView:self.view];
+                
+            }
+            else {
+                // email not valid
+            }
+            
+        }
+        else {
+            // password blank
+        }
+
+    }
+    else {
+        // email blank
+    }
+    
+    
+    
+    
+    
+    
+    */
+    
+}
+
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+        
+    NSLog(@"Login successful");
+    
+    NSString * refreshToken = [responseDict objectForKey:kRefreshToken];
+    NSString * accessToken = [responseDict objectForKey:kAccessToken];
+    NSString * expiresIn = [responseDict objectForKey:kAccessTokenExpiresIn];
+    NSString * accessTokenType = [responseDict objectForKey:kAccessTokenType];
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setValue:refreshToken forKey:kDefaultsRefreshToken];
+    [userDefaults setValue:accessToken forKey:kDefaultsAccessToken];
+    [userDefaults setValue:[NSNumber numberWithInteger:[expiresIn integerValue]] forKey:kDefaultsAccessTokenExpiresIn];
+    [userDefaults setValue:accessTokenType forKey:kDefaultsAccessTokenType];
+    [userDefaults setValue:[NSNumber numberWithInteger:5184000] forKey:kDefaultsRefreshTokenExpiresIn];
+    [userDefaults setValue:[NSDate date] forKey:kDefaultsAccessTokenReceivedTime];
+    [userDefaults setValue:[NSDate date] forKey:kDefaultsRefreshTokenReceivedTime];
+    
+
+    [userDefaults synchronize];
+    
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsAccessTokenType]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsRefreshToken]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsAccessToken]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsAccessTokenExpiresIn]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsRefreshTokenExpiresIn]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsAccessTokenReceivedTime]);
+    NSLog(@"%@", [userDefaults valueForKey:kDefaultsRefreshTokenReceivedTime]);
+    
+    
+        if (![responseDict objectForKey:kFirstTimeLogin]) {
+            NSLog(@"Show association screen");
+        }
+        else if ([[responseDict objectForKey:kCountrylist] count]>0) {
+            UIStoryboard *mainStoryboard = UISTORYBOARD;
+            
+            MSACountrySelectViewController *controller = (MSACountrySelectViewController*)[mainStoryboard
+                                                                                           instantiateViewControllerWithIdentifier: @"CountrySelectController"];
+            controller.countryList = [responseDict objectForKey:kCountrylist];
+            [self.navigationController pushViewController:controller animated:YES];
+            
+        }
+        else {
+            [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+        }
+
+    
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    if (error.code == -1011 && [error.localizedDescription isEqualToString:@"Request failed: bad request (400)"]) {
+        NSData *errorResponseData = [error.userInfo objectForKey:@"com.alamofire.serialization.response.error.data"];
+        
+        NSError* err;
+        NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:errorResponseData options:0 error:&err];
+        if ([[responseDict objectForKey:@"rCode"] isEqualToString:@"00"]) {
+            NSLog(@"Login successful");
+            
+        }
+        else {
+            UIAlertView *alert  = [[UIAlertView alloc]initWithTitle:[responseDict objectForKey:@"rCode"] message:[responseDict objectForKey:@"rMsg"] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] ;
+            [alert show];
+        }
+
+        
+    }
+   
+
+    
+}
+
+
+@end

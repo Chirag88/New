@@ -1,0 +1,25 @@
+//
+//  MSASearchViewController.h
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "CMENetworkHandler.h"
+#import "AFNetworking.h"
+
+@protocol SearchResultCallbackDelegate <NSObject>
+
+-(void)expandSearchResultView:(BOOL)expand;
+
+@end
+
+@interface MSASearchViewController : UIViewController<UITableViewDelegate,UITableViewDataSource,UISearchBarDelegate>
+
+@property (nonatomic, strong) UISearchBar *globalSearchBar;
+@property(nonatomic,strong) NSMutableArray *searchResultProducts;
+@property(nonatomic,weak) id<SearchResultCallbackDelegate> delegate;
+
+@end

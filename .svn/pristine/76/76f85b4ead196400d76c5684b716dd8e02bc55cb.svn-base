@@ -1,0 +1,23 @@
+//
+//  MSASignupViewController.h
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "TTTAttributedLabel.h"
+
+@interface MSASignupViewController : UIViewController<TTTAttributedLabelDelegate>
+
+@property (nonatomic, weak) IBOutlet UITextField *emailField;
+@property (nonatomic, weak) IBOutlet UITextField *pwdField;
+@property (nonatomic, weak) IBOutlet UITextField *rePwdField;
+@property (nonatomic, weak) IBOutlet UIImageView *alreadyCheckImgView;
+@property (nonatomic, weak) IBOutlet TTTAttributedLabel *tncPolicyLbl;
+@property (nonatomic, weak) IBOutlet TTTAttributedLabel *loginLbl;
+
+- (IBAction)signupClicked:(id)sender;
+
+@end

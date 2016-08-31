@@ -1,0 +1,54 @@
+//
+//  MSAComparePlanViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 3/11/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAComparePlanViewController.h"
+#import "MSAComparePlanTableViewCell.h"
+
+@interface MSAComparePlanViewController ()
+
+@end
+
+@implementation MSAComparePlanViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.featureList.dataSource = self;
+    self.featureList.delegate = self;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark TableView Delegates
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    return 50;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 3;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    static NSString *CellIdentifier = @"MSAComparePlanTableViewCell";
+    
+    MSAComparePlanTableViewCell *cell = (MSAComparePlanTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = (MSAComparePlanTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSAComparePlanTableViewCell" owner:self options:nil] objectAtIndex:0];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    
+    return cell;
+}
+
+@end

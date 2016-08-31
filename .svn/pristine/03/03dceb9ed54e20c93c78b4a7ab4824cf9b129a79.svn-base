@@ -1,0 +1,16 @@
+//
+//  MSAPlanDetailTableViewCell.h
+//  MySchapp
+//
+//  Created by CK-Dev on 24/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface MSAPlanDetailTableViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *featureNameLbl;
+@property (weak, nonatomic) IBOutlet UILabel *featureValueLbl;
+@property (weak, nonatomic) IBOutlet UIView *cellBackgroundView;
+
+@end

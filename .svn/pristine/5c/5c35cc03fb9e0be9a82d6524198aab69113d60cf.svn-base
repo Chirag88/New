@@ -1,0 +1,14 @@
+//
+//  MSALocationViewController.h
+//  MySchapp
+//
+//  Created by M-Creative on 5/10/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "MSANetworkHandler.h"
+
+@interface MSALocationViewController : UIViewController<MSANetworkDelegate>
+
+@end

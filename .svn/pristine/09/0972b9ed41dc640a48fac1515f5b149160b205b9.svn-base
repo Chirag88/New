@@ -1,0 +1,23 @@
+//
+//  MSAComparePlanTableViewCell.m
+//  MySchapp
+//
+//  Created by CK-Dev on 3/30/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAComparePlanTableViewCell.h"
+
+@implementation MSAComparePlanTableViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

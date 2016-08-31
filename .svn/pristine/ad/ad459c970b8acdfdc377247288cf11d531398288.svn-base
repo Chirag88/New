@@ -1,0 +1,21 @@
+//
+//  MSACountrySelectViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 10/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSACountrySelectViewController.h"
+#import "MSAPlanViewContoller.h"
+#import "MSAConstants.h"
+
+@implementation MSACountrySelectViewController
+- (IBAction)continueClicked:(id)sender {
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSAPlanViewContoller *controller = (MSAPlanViewContoller*)[mainStoryboard
+                                                               instantiateViewControllerWithIdentifier: @"PlanViewContoller"];
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+@end

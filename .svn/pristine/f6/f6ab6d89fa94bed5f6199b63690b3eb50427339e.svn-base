@@ -1,0 +1,128 @@
+//
+//  MSASignupViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSASignupViewController.h"
+
+static CGFloat const kEspressoDescriptionTextFontSize = 17;
+
+static inline NSRegularExpression * NameRegularExpression() {
+    static NSRegularExpression *_nameRegularExpression = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _nameRegularExpression = [[NSRegularExpression alloc] initWithPattern:@"^\\w+" options:NSRegularExpressionCaseInsensitive error:nil];
+    });
+    
+    return _nameRegularExpression;
+}
+
+static inline NSRegularExpression * ParenthesisRegularExpression() {
+    static NSRegularExpression *_parenthesisRegularExpression = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _parenthesisRegularExpression = [[NSRegularExpression alloc] initWithPattern:@"\\([^\\(\\)]+\\)" options:NSRegularExpressionCaseInsensitive error:nil];
+    });
+    
+    return _parenthesisRegularExpression;
+}
+
+@interface MSASignupViewController ()
+
+@end
+
+@implementation MSASignupViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    [self addAttributesAndLinksToLabels];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)addAttributesAndLinksToLabels
+{
+    self.tncPolicyLbl.delegate = self;
+    
+    NSMutableDictionary *mutableActiveLinkAttributes = [NSMutableDictionary dictionary];
+    [mutableActiveLinkAttributes setValue:[NSNumber numberWithBool:NO] forKey:(NSString *)kCTUnderlineStyleAttributeName];
+    [mutableActiveLinkAttributes setValue:(__bridge id)[[UIColor redColor] CGColor] forKey:(NSString *)kCTForegroundColorAttributeName];
+    [mutableActiveLinkAttributes setValue:(__bridge id)[[UIColor colorWithRed:1.0f green:0.0f blue:0.0f alpha:0.1f] CGColor] forKey:(NSString *)kTTTBackgroundFillColorAttributeName];
+    [mutableActiveLinkAttributes setValue:(__bridge id)[[UIColor colorWithRed:1.0f green:0.0f blue:0.0f alpha:0.25f] CGColor] forKey:(NSString *)kTTTBackgroundStrokeColorAttributeName];
+    [mutableActiveLinkAttributes setValue:[NSNumber numberWithFloat:1.0f] forKey:(NSString *)kTTTBackgroundLineWidthAttributeName];
+    [mutableActiveLinkAttributes setValue:[NSNumber numberWithFloat:5.0f] forKey:(NSString *)kTTTBackgroundCornerRadiusAttributeName];
+    self.tncPolicyLbl.activeLinkAttributes = mutableActiveLinkAttributes;
+    
+    [self.tncPolicyLbl setText:@"I have read and agree to terms of service & privacy policy" afterInheritingLabelAttributesAndConfiguringWithBlock:^NSMutableAttributedString *(NSMutableAttributedString *mutableAttributedString) {
+        NSRange stringRange = NSMakeRange(0, [mutableAttributedString length]);
+        
+        NSRegularExpression *regexp = NameRegularExpression();
+        NSRange nameRange = [regexp rangeOfFirstMatchInString:[mutableAttributedString string] options:0 range:stringRange];
+        UIFont *boldSystemFont = [UIFont boldSystemFontOfSize:kEspressoDescriptionTextFontSize];
+        CTFontRef boldFont = CTFontCreateWithName((__bridge CFStringRef)boldSystemFont.fontName, boldSystemFont.pointSize, NULL);
+        if (boldFont) {
+            [mutableAttributedString removeAttribute:(__bridge NSString *)kCTFontAttributeName range:nameRange];
+            [mutableAttributedString addAttribute:(__bridge NSString *)kCTFontAttributeName value:(__bridge id)boldFont range:nameRange];
+            CFRelease(boldFont);
+        }
+        
+        [mutableAttributedString replaceCharactersInRange:nameRange withString:[[[mutableAttributedString string] substringWithRange:nameRange] uppercaseString]];
+        
+        regexp = ParenthesisRegularExpression();
+        [regexp enumerateMatchesInString:[mutableAttributedString string] options:0 range:stringRange usingBlock:^(NSTextCheckingResult *result, __unused NSMatchingFlags flags, __unused BOOL *stop) {
+            UIFont *italicSystemFont = [UIFont italicSystemFontOfSize:kEspressoDescriptionTextFontSize];
+            CTFontRef italicFont = CTFontCreateWithName((__bridge CFStringRef)italicSystemFont.fontName, italicSystemFont.pointSize, NULL);
+            if (italicFont) {
+                [mutableAttributedString removeAttribute:(NSString *)kCTFontAttributeName range:result.range];
+                [mutableAttributedString addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)italicFont range:result.range];
+                CFRelease(italicFont);
+                
+                [mutableAttributedString removeAttribute:(NSString *)kCTForegroundColorAttributeName range:result.range];
+                [mutableAttributedString addAttribute:(NSString *)kCTForegroundColorAttributeName value:(__bridge id)[[UIColor grayColor] CGColor] range:result.range];
+            }
+        }];
+        
+        return mutableAttributedString;
+    }];
+    
+    
+    NSURL *tncUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://google.com/%@", @""]];
+    [self.tncPolicyLbl addLinkToURL:tncUrl withRange:NSMakeRange(25, 16)];
+    NSURL *policyUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://google.com/%@", @""]];
+    [self.loginLbl addLinkToURL:policyUrl withRange:NSMakeRange(44, 14)];
+}
+
+- (IBAction)signupClicked:(id)sender
+{
+    
+}
+
+#pragma mark - TTTAttributedLabelDelegate
+
+- (void)attributedLabel:(__unused TTTAttributedLabel *)label
+   didSelectLinkWithURL:(NSURL *)url {
+    NSLog(@"clicked");
+}
+
+- (void)attributedLabel:(__unused TTTAttributedLabel *)label didLongPressLinkWithURL:(__unused NSURL *)url atPoint:(__unused CGPoint)point {
+
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

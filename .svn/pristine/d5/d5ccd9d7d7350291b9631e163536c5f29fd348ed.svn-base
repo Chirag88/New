@@ -1,0 +1,86 @@
+//
+//  MSAEducationViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 06/04/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAEducationViewController.h"
+#import "MSAEducationTableViewCell.h"
+
+@interface MSAEducationViewController ()<UITableViewDataSource,UITableViewDelegate>
+{
+    __weak IBOutlet UITextField *qualificationTxt;
+    __weak IBOutlet UITextField *yearOfPassingTxt;
+    __weak IBOutlet UITableView *educationList;
+}
+- (IBAction)addEducationClicked:(id)sender;
+
+@end
+
+@implementation MSAEducationViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Education";
+
+    self.savedEducationArray = @[@"Bcom -2010",@"BTech -2014",@"Mtech -2016"];
+    
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(saveSelectedlanguages)];
+    self.navigationItem.rightBarButtonItem = doneButton;
+    
+    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelSelectedlanguages)];
+    self.navigationItem.leftBarButtonItem = cancelButton;
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark TableView Delegates
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    return 60;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.savedEducationArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    static NSString *CellIdentifier = @"MSAEducationTableViewCell";
+    
+    MSAEducationTableViewCell *cell = (MSAEducationTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = (MSAEducationTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSAEducationTableViewCell" owner:self options:nil] objectAtIndex:0];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    cell.qualificationLabel.text = [self.savedEducationArray objectAtIndex:indexPath.row];
+    //cell.delegate = self;
+    return cell;
+}
+
+
+- (IBAction)addEducationClicked:(id)sender {
+    
+}
+
+
+-(void)saveSelectedlanguages {
+    
+    [self.delegate educationDoneClickedWithValues:nil];
+    [self.navigationController popViewControllerAnimated:YES];
+    
+}
+
+-(void)cancelSelectedlanguages {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+@end

@@ -1,0 +1,268 @@
+//
+//  MSALoginDecision.m
+//  MySchapp
+//
+//  Created by CK-Dev on 3/17/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSALoginDecision.h"
+#import "MSAUtils.h"
+#import "MSAConstants.h"
+
+@implementation MSALoginDecision
+
+- (void)checkLoginCriteriaWhileLaunching
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if([userDefaults valueForKey:kRefreshToken])
+    {
+        //refresh token available
+        if([self isValidRefreshToken])// change logic of valid resfresh instead of time get access token if you get access token then R token is valid before getting new access token check the validity of existing A token // dont change logic as agreed to take 2 months fixed time currently 7 days for testing
+        {
+            //open landing page without login and signup options.
+            if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                [self.delegate redirectToPage:@"LandingPageWithoutLoginSignup"];
+        }
+        else
+        {
+            //open landing page with login and signup options
+            if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                [self.delegate redirectToPage:@"LandingPageWithLoginSignup"];
+        }
+    }
+    else    //refresh token not available
+    {
+        
+        //open landing page with login and signup options
+        if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+            [self.delegate redirectToPage:@"LandingPageWithLoginSignup"];
+    }
+}
+
+- (void)checkLoginCriteria
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if([userDefaults valueForKey:kRefreshToken])
+    {
+        //refresh token available
+        if([self isValidRefreshToken])
+        {
+            //refresh token valid
+            if([self isValidAccessToken])
+            {
+                //access token valid
+                [self checkProfileStatus];
+            }
+            else
+            {
+                //get valid access token(and store all flag in userdefaults using refresh token then check profile status
+                [self getAccessToken];
+            }
+        }
+        else
+        {
+            //open login page
+            if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                [self.delegate redirectToPage:@"Login"];
+        }
+    }
+    else    //refresh token not available
+    {
+        //open login page
+        if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+            [self.delegate redirectToPage:@"Login"];
+    }
+}
+
+- (void)getAccessToken
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    // get access token first
+    NSString *urlString = [NSString stringWithFormat:@"%@?client_id=%@&client_secret=%@&grant_type=%@&refresh_token=%@",[NSString stringWithFormat:@"%@%@",BASE_URL,REFRESHTOKENLOGINURL],kLoginServiceClientID,kLoginServiceClientSecret,kAccessTokenServiceGrantType,[userDefaults valueForKey:kDefaultsRefreshToken]];
+    
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"AccessToken" requestHeaders:nil andRequestParameters:nil inView:nil];
+    
+}
+
+
+
+- (void)checkProfileStatus
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if(![[userDefaults valueForKey:kDefaultsProfileStatus] isEqualToString:@"PC"])
+    {
+        if([[userDefaults valueForKey:kDefaultsUserRole] isEqualToString:@"C"])// check role
+        {
+            if((![userDefaults valueForKey:kDefaultsAssociationList] || [[userDefaults valueForKey:kDefaultsAssociationList] count]==0))    //check association
+            {
+                //open country selection page > select country> hit S99
+                if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                    [self.delegate redirectToPage:@"CountrySelection"];
+            }
+            else {
+                //open Association selection
+                if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                    [self.delegate redirectToPage:@"AssociationScreen"];
+                
+                //Open association screen > Select association> continue hit S22 with regdid
+                //in response of S22
+                // "role": "EP", Fixed from now cannot be changed
+                // "countrycodeid":101 Fixed from now cannot be changed
+                // skip country selection open personal details page
+            }
+        }
+        else    //other roles except IP and SA
+        {
+//            open Personal details hit S28 without request parameter
+//            show the data of personal details received in S28 (Personal service)
+//            send request with update data of S28 in S29 (security service)
+//            send request with update data of S29 in S30 (notification service)
+//            send data of S30 in request of S31
+//            in response of S31 success profile completed.
+            
+        }
+    }
+    else
+    {
+        //check below flags and open landing pages
+//        priority high to low if ps == pc
+//            1. bl show message  if yes hit S35 else delete r and A token from the app.
+//                2. pr take to payment Screen
+//                3. rt
+//                4. pd
+        
+        
+        if (![userDefaults valueForKey:kDefaultsBlockedFlag]) {
+            if (![userDefaults valueForKey:kDefaultsPaymentRequiredFlag]) {
+                if (![userDefaults valueForKey:kDefaultsReacceptTermsFlag]) {
+                    if (![userDefaults valueForKey:kDefaultsPaymentDueFlag]) {
+                        
+                        // check for the roles and open the appropriate landing pages
+                        //open landing pages based on the roles EP , CP, LA, TA ,IP, SA, C
+                        
+                    }
+                    else {
+                        // open alert warning message payment is due
+                        [MSAUtils showAlertWithTitle:@"Warning" message:@"Your payment is due" cancelButton:nil otherButton:@"Ok" delegate:self.delegate];
+                    }
+                    
+                }
+                else {
+                    // Open Reaccept terms page
+                    if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                        [self.delegate redirectToPage:@"ReacceptTerms Screen"];
+
+                }
+                
+            }
+            else {
+                // Open Payment page
+                if([self.delegate respondsToSelector:@selector(redirectToPage:)])
+                    [self.delegate redirectToPage:@"PaymentScreen"];
+
+            }
+        }
+        else {
+            [MSAUtils showAlertWithTitle:@"User Blocked" message:@"Your account is disable, Are you sure you want to re-enable your and all other accounts associated with you." cancelButton:@"Cancel" otherButton:@"Ok" delegate:self.delegate];
+        }
+        
+        
+        
+    }
+}
+
+-(BOOL)isValidRefreshToken {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *expireTimeInterval = [userDefaults valueForKey:kDefaultsRefreshTokenExpiresIn];
+    NSDate *refeshTokenReceiveTime = [userDefaults valueForKey:kDefaultsRefreshTokenReceivedTime];
+    
+    NSDate *currentDateTime = [NSDate date];
+    NSDate *newDate = [refeshTokenReceiveTime dateByAddingTimeInterval:[expireTimeInterval doubleValue]];
+    if ([currentDateTime compare:newDate]== NSOrderedAscending) {
+        // Not Expired
+        return YES;
+    }
+    return NO;
+    
+}
+
+-(BOOL)isValidAccessToken {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *expireTimeInterval = [userDefaults valueForKey:kDefaultsAccessTokenExpiresIn];
+    NSDate *accessTokenReceiveTime = [userDefaults valueForKey:kDefaultsAccessTokenReceivedTime];
+    
+    NSDate *currentDateTime = [NSDate date];
+    NSDate *newDate = [accessTokenReceiveTime dateByAddingTimeInterval:[expireTimeInterval doubleValue]];
+    if ([currentDateTime compare:newDate]== NSOrderedAscending) {
+        // Not Expired
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+    if ([requestId isEqualToString:@"AccessToken"]) {
+        if ([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]){
+            NSString * refreshToken = [responseDict objectForKey:kRefreshToken];
+            NSString * accessToken = [responseDict objectForKey:kAccessToken];
+            NSString * expiresIn = [responseDict objectForKey:kAccessTokenExpiresIn];
+            NSString * accessTokenType = [responseDict objectForKey:kAccessTokenType];
+            NSString * scope = [responseDict objectForKey:kLoginScope];
+            NSString * userRole = [responseDict objectForKey:kUserRole];
+            NSString * profileStatus = [responseDict objectForKey:kProfileStatus];
+            NSArray * countryList = [responseDict objectForKey:kCountryList];
+            NSString * firstTimeLogin = [responseDict objectForKey:kFirstTimeLogin];
+            NSString * appVersion = [responseDict objectForKey:kAppVersion];
+            
+            NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+            [userDefaults setValue:refreshToken forKey:kDefaultsRefreshToken];
+            [userDefaults setValue:accessToken forKey:kDefaultsAccessToken];
+            [userDefaults setValue:[NSNumber numberWithInteger:[expiresIn integerValue]] forKey:kDefaultsAccessTokenExpiresIn];
+            [userDefaults setValue:accessTokenType forKey:kDefaultsAccessTokenType];
+            [userDefaults setValue:[NSDate date] forKey:kDefaultsAccessTokenReceivedTime];
+            [userDefaults setValue:scope forKey:kDefaultsLoginScope];
+            [userDefaults setValue:userRole forKey:kDefaultsUserRole];
+            [userDefaults setValue:countryList forKey:kDefaultsCountryList];
+            [userDefaults setValue:profileStatus forKey:kDefaultsProfileStatus];
+            [userDefaults setValue:firstTimeLogin forKey:kDefaultsFirstTimeLogin];
+            [userDefaults setValue:appVersion forKey:kDefaultsAppVersion];
+            
+            [userDefaults synchronize];
+            
+            [self checkProfileStatus];
+        }
+        else {
+                NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                [userDefaults removeObjectForKey:kDefaultsRefreshToken];
+                [userDefaults removeObjectForKey:kDefaultsAccessToken];
+                [userDefaults removeObjectForKey:kDefaultsAccessTokenExpiresIn];
+                [userDefaults removeObjectForKey:kDefaultsAccessTokenType];
+                [userDefaults removeObjectForKey:kDefaultsAccessTokenReceivedTime];
+                [userDefaults synchronize];
+                // take to login page invalid refresh token
+
+        }
+    }
+    
+
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    UIAlertView *alert  = [[UIAlertView alloc]initWithTitle:@"Message" message:@"Internal error, Please try later." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] ;
+    [alert show];
+    
+}
+
+@end

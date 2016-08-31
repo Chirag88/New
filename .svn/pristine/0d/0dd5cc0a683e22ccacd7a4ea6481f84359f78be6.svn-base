@@ -1,0 +1,41 @@
+//
+//  MSACountrySelectViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 10/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSACountrySelectViewController.h"
+#import "MSAPlanViewContoller.h"
+#import "MSAConstants.h"
+
+@implementation MSACountrySelectViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];    
+    NSLog(@"%@", [userDefaults objectForKey:kRefreshToken]);
+    NSLog(@"%@", [userDefaults objectForKey:kAccessToken]);
+    NSLog(@"%@", [userDefaults objectForKey:kAccessTokenExpiresIn]);
+    NSLog(@"%@", [userDefaults objectForKey:kTokenReceivedTime]);
+    
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+- (IBAction)continueClicked:(id)sender {
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSAPlanViewContoller *controller = (MSAPlanViewContoller*)[mainStoryboard
+                                                               instantiateViewControllerWithIdentifier: @"PlanViewContoller"];
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+@end

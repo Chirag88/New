@@ -1,0 +1,32 @@
+//
+//  MSAProtocols.h
+//  MySchapp
+//
+//  Created by CK-Dev on 07/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#ifndef MSAProtocols_h
+#define MSAProtocols_h
+
+
+#endif /* MSAProtocols_h */
+
+@protocol LoginSignupDismissHandler <NSObject>
+
+-(void)controllerGotDissmissed:(UIViewController *)controller;
+
+@end
+
+@protocol LoginDecisionDelegate <NSObject>
+
+-(void)redirectToPage:(NSString *)pageToBeOpened;
+
+@end
+
+@protocol PlanSelectionDelegate <NSObject>
+@required
+-(void)selectedPlan:(NSString *)planId;
+-(void)viewPlanDetail:(id)plan;
+
+@end

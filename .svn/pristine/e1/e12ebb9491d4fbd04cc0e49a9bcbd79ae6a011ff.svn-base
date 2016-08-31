@@ -1,0 +1,37 @@
+//
+//  MSAAssociationTableViewCell.m
+//  MySchapp
+//
+//  Created by CK-Dev on 04/30/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAAssociationTableViewCell.h"
+
+@implementation MSAAssociationTableViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(radioTapped:)];
+    [self.radioImage addGestureRecognizer:tap];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+- (void)radioTapped:(UITapGestureRecognizer *)recognizer
+{
+    if(self.radioImage.highlighted)
+    {
+        self.radioImage.highlighted = NO;
+    }
+    if(!self.radioImage.highlighted)
+    {
+        self.radioImage.highlighted = YES;
+    }
+}
+
+@end

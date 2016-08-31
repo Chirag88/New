@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "8b05b6af-2bc8-dc45-8f52-137a759baf32++324",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "8b05b6af-2bc8-dc45-8f52-137a759baf32++324" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "8b05b6af-2bc8-dc45-8f52-137a759baf32++324" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "66981B8A-0A10-4443-B169-0C4EC80829F3",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "8b05b6af-2bc8-dc45-8f52-137a759baf32++324" : "WorkingCode\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "MySchapp",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "MySchapp.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/67.170.250.11:7031\/svn\/myschappIOS",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "8b05b6af-2bc8-dc45-8f52-137a759baf32++324"
+    }
+  ]
+}

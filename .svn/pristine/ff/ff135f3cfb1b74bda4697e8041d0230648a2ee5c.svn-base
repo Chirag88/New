@@ -1,0 +1,29 @@
+//
+//  MSAConstants.h
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#ifndef MSAConstants_h
+#define MSAConstants_h
+
+
+#endif /* MSAConstants_h */
+
+
+#define UISTORYBOARD [UIStoryboard storyboardWithName:@"Main" bundle: nil]
+// URLS
+
+#define BASEURL                     @"http://67.170.250.11:1487/schmobileapp/"
+#define SIGNUPURL                   @"loginsignup/A26"
+#define VERIFYOTPURL                @"loginsignup/A27"
+#define REFRESHTOKENLOGINURL        @"oauth/token"
+
+#define ClientID                   @"mysupplycompany"
+#define ClientSecret               @"mycompanykey"#define UISTORYBOARD [UIStoryboard storyboardWithName:@"Main" bundle: nil]
+
+#define BASE_URL    @"http://67.170.250.11:1487/schmobileapp/"
+#define SIGNUP_URL  @"loginsignup/A26"
+#define VERIFY_URL  @"loginsignup/A27"

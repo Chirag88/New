@@ -1,0 +1,15 @@
+//
+//  MSAEducationTableViewCell.h
+//  MySchapp
+//
+//  Created by CK-Dev on 08/04/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface MSAEducationTableViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *qualificationLabel;
+- (IBAction)qualificationDelete:(id)sender;
+
+@end

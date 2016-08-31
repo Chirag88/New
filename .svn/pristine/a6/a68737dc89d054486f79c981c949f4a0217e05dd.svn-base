@@ -1,0 +1,388 @@
+//
+//  MSALandingPageViewController.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSALandingPageViewController.h"
+#import "MSASplashViewController.h"
+#import "MSAConstants.h"
+#import "MSALoginViewController.h"
+#import "MSASignupViewController.h"
+#import "iCarousel.h"
+
+@interface MSALandingPageViewController ()<LoginSignupDismissHandler>
+{
+    UIView *navView;
+    UIView *midView;
+    UIView *loginSignupView;
+    UIView *menuView;
+}
+- (IBAction)loginClicked:(id)sender;
+- (IBAction)signupClicked:(id)sender;
+
+@end
+
+@implementation MSALandingPageViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    /*
+    [self designLandingPage];
+    [self designMenu];
+     */
+}
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden  = YES;
+    self.navigationItem.hidesBackButton = YES;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)designMenu
+{
+    menuView = [[UIView alloc] init];
+    menuView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:menuView];
+    [self.view sendSubviewToBack:menuView];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[menu(150)]|" options:0 metrics:nil views:@{@"menu":menuView}]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[menu]|" options:0 metrics:nil views:@{@"menu":menuView}]];
+    
+    UITableView *menuList = [[UITableView alloc] init];
+    menuList.dataSource = self;
+    menuList.delegate = self;
+    menuList.translatesAutoresizingMaskIntoConstraints = NO;
+    [menuView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[menuList]|" options:0 metrics:nil views:@{@"menuList":menuList}]];
+    [menuView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[menuList]|" options:0 metrics:nil views:@{@"menuList":menuList}]];
+}
+
+- (void)designLandingPage
+{
+    navView = [[UIView alloc] init];
+    navView.translatesAutoresizingMaskIntoConstraints = NO;
+    midView = [[UIView alloc] init];
+    midView.translatesAutoresizingMaskIntoConstraints = NO;
+    loginSignupView = [[UIView alloc] init];
+    loginSignupView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    [self.view addSubview:navView];
+    [self.view addSubview:midView];
+    [self.view addSubview:loginSignupView];
+    
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[navView]|" options:0 metrics:nil views:@{@"navView":navView}]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[midView]|" options:0 metrics:nil views:@{@"midView":midView}]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[loginSignupView]|" options:0 metrics:nil views:@{@"loginSignupView":loginSignupView}]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[navView(40)][midView][loginSignupView(60)]|" options:0 metrics:nil views:@{@"navView":navView,@"midView":midView,@"loginSignupView":loginSignupView}]];
+    
+    [self designNavigationView];
+    [self designMiddleView];
+    [self designLoginSignupView];
+}
+- (void)designNavigationView
+{
+    UIButton *drawerBtn = [[UIButton alloc] init];
+    drawerBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [drawerBtn setTitle:@"Menu" forState:UIControlStateNormal];
+    [drawerBtn addTarget:self action:@selector(menuClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [navView addSubview:drawerBtn];
+    UIImageView *iconImage = [[UIImageView alloc] init];
+    iconImage.translatesAutoresizingMaskIntoConstraints = NO;
+    iconImage.image = [UIImage imageNamed:@""];
+    [navView addSubview:iconImage];
+    UISearchBar *navSearchBar = [[UISearchBar alloc] init];
+    navSearchBar.translatesAutoresizingMaskIntoConstraints = NO;
+    navSearchBar.placeholder = @"Search within 10 miles";
+    [navView addSubview:navSearchBar];
+    [navView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[drawerBtn(30)]-10-[iconImage(30)][searchBar]|" options:0 metrics:nil views:@{@"drawerBtn":drawerBtn,@"searchBar":navSearchBar,@"iconImage":iconImage}]];
+    [navView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[drawerBtn]|" options:0 metrics:nil views:@{@"drawerBtn":drawerBtn}]];
+    [navView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[iconImage]|" options:0 metrics:nil views:@{@"iconImage":iconImage}]];
+    [navView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[searchBar]|" options:0 metrics:nil views:@{@"searchBar":navSearchBar}]];
+    
+}
+- (void)designMiddleView
+{
+    //label
+    UILabel *infoLabel = [[UILabel alloc] init];
+    infoLabel.text = @"Find the time to book ypu appointment for the service you are looking for.";
+    infoLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:infoLabel];
+    //image
+    UIImageView *infoImg = [[UIImageView alloc] init];
+    infoImg.image = [UIImage imageNamed:@""];
+    infoImg.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:infoImg];
+    //carousel
+    iCarousel *categoryView = [[iCarousel alloc] init];
+    categoryView.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:categoryView];
+    //label
+    UILabel *distanceLabel = [[UILabel alloc] init];
+    distanceLabel.text = @"Search with in";
+    distanceLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:distanceLabel];
+    //textfield
+    UIPickerView *distanceInputView = [[UIPickerView alloc] init];
+    distanceInputView.dataSource = self;
+    distanceInputView.delegate = self;
+    UITextField *distanceField = [[UITextField alloc] init];
+    distanceField.text = @"";
+    distanceField.inputView = distanceInputView;
+    distanceLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:distanceField];
+    //label
+    UILabel *locationLabel = [[UILabel alloc] init];
+    locationLabel.text = @"location";
+    locationLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:locationLabel];
+    //button
+    UIButton *searchButton = [[UIButton alloc] init];
+    searchButton.titleLabel.text = @"Search";
+    searchButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:searchButton];
+    
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[infoLabel]|" options:0 metrics:nil views:@{@"infoLabel":infoLabel}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[infoImg]|" options:0 metrics:nil views:@{@"infoImg":infoImg}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[category]|" options:0 metrics:nil views:@{@"category":categoryView}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[distanceLabel]|" options:0 metrics:nil views:@{@"distanceLabel":distanceLabel}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[distanceField]|" options:0 metrics:nil views:@{@"distanceField":distanceField}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[locationLabel]|" options:0 metrics:nil views:@{@"locationLabel":locationLabel}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[searchButton]|" options:0 metrics:nil views:@{@"searchButton":searchButton}]];
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[infoLabel(40)][infoImg(40)][category(70)][distanceLabel(20)][distanceField(30)][locationLabel(30)][searchButton(30)]|" options:0 metrics:nil views:@{@"infoLabel":infoLabel,@"infoImg":infoImg,@"category":categoryView,@"distanceLabel":distanceLabel,@"distanceField":distanceField,@"locationLabel":locationLabel,@"searchButton":searchButton}]];
+    
+}
+- (void)designLoginSignupView
+{
+    UIButton *loginButton = [[UIButton alloc] init];
+    loginButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [loginButton addTarget:self action:@selector(loginClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [loginSignupView addSubview:loginButton];
+    UIButton *signupButton = [[UIButton alloc] init];
+    signupButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [signupButton addTarget:self action:@selector(signupClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [loginSignupView addSubview:signupButton];
+    [loginSignupView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[login(80)]-100-[signup(80)]|" options:0 metrics:nil views:@{@"login":loginButton,@"signup":signupButton}]];
+    [loginSignupView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[login]|" options:0 metrics:nil views:@{@"login":loginButton}]];
+    [loginSignupView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[signup]|" options:0 metrics:nil views:@{@"signup":signupButton}]];
+}
+
+#pragma mark - UIPickerViewDatasource
+
+-(NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+    return 3;
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    return @"name";
+}
+
+#pragma mark - UIPickerViewDelegate
+
+-(void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
+    
+}
+
+#pragma mark - UITableViewDatasource
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 5;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return nil;
+}
+
+#pragma mark - UITableViewDelegate
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+}
+
+#pragma mark - iCarousel methods
+
+//- (NSInteger)numberOfItemsInCarousel:(iCarousel *)carousel
+//{
+//    return self.pageDetails.count;
+//}
+//
+//- (UIView *)carousel:(iCarousel *)carousel viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view
+//{
+//    
+//    CGRect frame = self.carousel.frame;
+//    frame.origin.x = frame.size.width * index;
+//    frame.origin.y = 0.0f;
+//    
+//    NSDictionary *detail = [self.pageDetails objectAtIndex:index%self.pageDetails.count];
+//    NSString *image = [detail valueForKey:@"imageName"];
+//    NSString *imageText = [detail valueForKey:@"imageText"];
+//    
+//    UIImageView *newPageView = [[UIImageView alloc] initWithFrame:frame];
+//    UIImage *pageImage = [CMEUtils imageWithImage:[UIImage imageWithContentsOfFile:[CMEUtils cachePathForFileName:image inDirectory:CAROUSEL_DIR]] scaledToWidth:frame.size.width*2];
+//    newPageView.image = pageImage;
+//    newPageView.userInteractionEnabled = YES;
+//    
+//    CMELabel *aLabel = [[CMELabel alloc] initWithFrame:CGRectMake(0, frame.size.height/2-frame.size.height/4, frame.size.width/1.5, frame.size.height/2)];
+//    aLabel.backgroundColor = [UIColor blackColor];
+//    aLabel.textColor = [UIColor whiteColor];
+//    aLabel.alpha = 0.6f;
+//    aLabel.numberOfLines = 3;
+//    [aLabel adjustFontSizeAccToScreenWidth:[UIFont fontWithName:@"Roboto-Bold" size:20.0]];
+//    [aLabel setCustomEdgeInsets:UIEdgeInsetsMake(0,10,0,10)];
+//    aLabel.text = imageText;
+//    [newPageView addSubview:aLabel];
+//    
+//    [self.carousel addSubview:newPageView];
+//    [self.pageViews replaceObjectAtIndex:index%self.pageDetails.count withObject:newPageView];
+//    
+//    return newPageView;
+//    
+//}
+
+- (void)carouselWillBeginDragging:(iCarousel *)carousel
+{
+    // DLog(@"Carousel will begin dragging");
+    
+}
+
+- (void)carouselDidEndDragging:(iCarousel *)carousel willDecelerate:(BOOL)decelerate
+{
+    //DLog(@"Carousel did end dragging and %@ decelerate", decelerate? @"will": @"won't");
+}
+
+- (void)carouselWillBeginDecelerating:(iCarousel *)carousel
+{
+    //DLog(@"Carousel will begin decelerating");
+}
+
+- (void)carouselDidEndDecelerating:(iCarousel *)carousel
+{
+    // DLog(@"Carousel did end decelerating");
+}
+
+- (void)carouselWillBeginScrollingAnimation:(iCarousel *)carousel
+{
+    //DLog(@"Carousel will begin scrolling");
+}
+
+//- (void)carouselDidEndScrollingAnimation:(iCarousel *)carousel
+//{
+//    // DLog(@"Carousel did end scrolling%ld",(long)carousel.currentItemIndex);
+//    // Update the page control
+//    self.pageControl.currentPage = [self.carousel currentItemIndex];
+//    
+//}
+
+- (BOOL)carousel:(iCarousel *)carousel shouldSelectItemAtIndex:(NSInteger)index
+{
+    if (index == carousel.currentItemIndex)
+    {
+        // DLog(@"Should select current item");
+    }
+    else
+    {
+        //DLog(@"Should select item number %li", (long)index);
+    }
+    return YES;
+}
+
+//- (void)carousel:(iCarousel *)carousel didSelectItemAtIndex:(NSInteger)index
+//{
+//    NSDictionary *detail = [self.pageDetails objectAtIndex:index];
+//    if([self.delegate respondsToSelector:@selector(didSelectPageWithDetail:)])
+//        [self.delegate didSelectPageWithDetail:detail];
+//}
+
+- (CGFloat)carousel:(iCarousel *)_carousel valueForOption:(iCarouselOption)option withDefault:(CGFloat)value
+{
+    //customize carousel display
+    switch (option)
+    {
+        case iCarouselOptionWrap:
+        {
+            //normally you would hard-code this to YES or NO
+            return YES;
+        }
+        default:
+        {
+            return value;
+        }
+    }
+}
+
+
+#pragma mark - IBAction
+- (IBAction)loginClicked:(id)sender {
+    
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    MSALoginViewController *controller = (MSALoginViewController*)[mainStoryboard
+                                                                      instantiateViewControllerWithIdentifier: @"LoginViewController"];
+    
+    controller.loginDelegate = self;
+    UINavigationController *navLoginController = [[UINavigationController alloc] initWithRootViewController:controller];
+    [self presentViewController:navLoginController animated:YES completion:nil];
+    
+    
+}
+
+- (IBAction)signupClicked:(id)sender {
+    
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    
+    
+    MSASignupViewController *controller = (MSASignupViewController*)[mainStoryboard
+                                                                     instantiateViewControllerWithIdentifier: @"SignupViewController"];
+    
+    controller.signupDelegate = self;
+    UINavigationController *navSignupController = [[UINavigationController alloc] initWithRootViewController:controller];
+    [self presentViewController:navSignupController animated:YES completion:nil];
+
+}
+
+- (void)menuClicked:(id)sender
+{
+    if(true)    //logged in
+    {
+        
+    }
+    else
+    {
+        //alert to inform user to log in first
+    }
+}
+
+-(void)controllerGotDissmissed:(UIViewController *)controller {
+    if ([controller isKindOfClass:[MSALoginViewController class]]) {
+        [controller dismissViewControllerAnimated:NO completion:nil];
+        [self signupClicked:nil];
+    }
+    else if ([controller isKindOfClass:[MSASignupViewController class]]) {
+        [controller dismissViewControllerAnimated:NO completion:nil];
+        [self loginClicked:nil];
+    }
+    
+    
+}
+
+@end

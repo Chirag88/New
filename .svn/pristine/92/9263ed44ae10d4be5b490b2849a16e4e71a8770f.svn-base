@@ -1,0 +1,160 @@
+//
+//  MSAPlanViewContoller.m
+//  MySchapp
+//
+//  Created by CK-Dev on 10/03/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAPlanViewContoller.h"
+#import "MSAPlanTableViewCell.h"
+#import "MSAConstants.h"
+#import "MSAPlanDetailViewController.h"
+#import "MSAPersonalViewController.h"
+#import "MSALoginDecision.h"
+#import "MSAUtils.h"
+
+
+@interface MSAPlanViewContoller()<LoginDecisionDelegate>
+{
+    NSMutableArray *plansAvailable;
+    NSString *selectedPlanId;
+    __weak IBOutlet UILabel *selectedCountryOutlet;
+}
+@end
+
+@implementation MSAPlanViewContoller
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    self.navigationController.navigationBarHidden = NO;
+    self.navigationItem.title = @"Plans";
+    
+    selectedCountryOutlet.text = self.selectedCountryName;
+    NSString *urlString = [NSString stringWithFormat:@"%@",[NSString stringWithFormat:@"%@%@",BASEURL,PLANURL]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    NSDictionary *reqHeadDict = @{@"Authorization":[NSString stringWithFormat:@"bearer %@",[[NSUserDefaults standardUserDefaults] valueForKey:kAccessToken]]};
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"Plans" requestHeaders:reqHeadDict andRequestParameters:@{@"countrycodeid":self.selectedCountryId} inView:self.view];
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+#pragma mark TableView Delegates
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    return 90;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return plansAvailable.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    static NSString *CellIdentifier = @"MSAPlanTableViewCell";
+    
+    MSAPlanTableViewCell *cell = (MSAPlanTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = (MSAPlanTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSAPlanTableViewCell" owner:self options:nil] objectAtIndex:0];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    cell.planName.text = [[plansAvailable objectAtIndex:indexPath.row] valueForKey:@"planname"];
+    cell.planFees.text = [[[plansAvailable objectAtIndex:indexPath.row] valueForKey:@"plancost"] stringValue];
+    cell.planDescription.text = [[plansAvailable objectAtIndex:indexPath.row] valueForKey:@"plantype"];
+    cell.features = [[plansAvailable objectAtIndex:indexPath.row] valueForKey:@"features"];
+    cell.delegate = self;
+    cell.planId = [[plansAvailable objectAtIndex:indexPath.row] valueForKey:@"planid"];
+    return cell;
+}
+
+
+- (IBAction)comparePlans:(id)sender
+{
+    // open compare plan screen
+}
+
+
+#pragma mark - PlanSelection and Detail Delegate
+
+-(void)selectedPlan:(NSString *)planId {
+    // open personal detail page
+    // and fetch the details hit S28 with planid and countryid
+    
+    selectedPlanId = planId;
+    MSALoginDecision *loginDecision = [[MSALoginDecision alloc]init];
+    loginDecision.delegate = self;
+    [loginDecision checkLoginCriteria];
+    
+    
+    
+    
+}
+
+-(void)viewPlanDetail:(id)plan {
+    
+    //open plan detail screen
+    
+    MSAPlanTableViewCell *planSelected = plan;
+    UIStoryboard *mainStoryboard = UISTORYBOARD;
+    
+    MSAPlanDetailViewController *controller = (MSAPlanDetailViewController*)[mainStoryboard
+                                                                                   instantiateViewControllerWithIdentifier:@"PlanDetailController"];
+    controller.planFeatures = planSelected.features;
+    controller.planName = planSelected.planName.text;
+    controller.planFees = planSelected.planFees.text;
+    [self.navigationController pushViewController:controller animated:YES];
+    
+    
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    //NSLog(@"%@",responseDict);
+    if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
+        plansAvailable = [responseDict valueForKey:@"plans"];
+        [self.plansTableView reloadData];
+    }
+
+}
+
+-(void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+     [MSAUtils showAlertWithTitle:kAlertMessageTitle message:kAlertInternalErrorMsg cancelButton:kAlertOkButtonTitle otherButton:nil delegate:self];
+}
+
+#pragma LoginDecision Delegate
+- (void)redirectToPage:(NSString *)pageToBeOpened {
+    if ([pageToBeOpened isEqualToString:kLoginScreen]) {
+        [self.navigationController popToRootViewControllerAnimated:NO];
+        
+    }
+    else if ([pageToBeOpened isEqualToString:kCountrySelectionScreen])
+    {
+        UIStoryboard *mainStoryboard = UISTORYBOARD;
+        
+        MSAPersonalViewController *controller = (MSAPersonalViewController*)[mainStoryboard
+                                                                             instantiateViewControllerWithIdentifier:@"MSAPersonalViewController"];
+        controller.selectedCountryId = self.selectedCountryId;
+        controller.selectedPlanId = selectedPlanId;
+        controller.selectedCountryName = self.selectedCountryName;
+        [self.navigationController pushViewController:controller animated:YES];
+    }
+}
+
+
+
+@end

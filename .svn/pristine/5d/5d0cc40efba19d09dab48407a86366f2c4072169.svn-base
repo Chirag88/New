@@ -1,0 +1,46 @@
+//
+//  MSAUtils.m
+//  MySchapp
+//
+//  Created by CK-Dev on 23/02/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSAUtils.h"
+
+@implementation MSAUtils
+
++ (BOOL)validateEmail:(NSString *)email {
+    NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+    
+    return [emailTest evaluateWithObject:email];
+}
+
++ (BOOL)validatePassword:(NSString *)password {
+    NSString *pwdRegex = @"^(?=.{10,})(?=.*[0-9])(?=.*[a-zA-Z])([@#$%^&=a-zA-Z0-9_-]+)$";//@"^(?=.{2,8}$)(?=.*?[A-Za-z0-9])(?=.*?[\W_])[\w\W]+";
+    
+   
+    
+    NSPredicate *pwdTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", pwdRegex];
+    
+    return [pwdTest evaluateWithObject:password];
+}
+
++ (void)showAlertWithTitle: (NSString *) title message:(NSString *)message cancelButton:(NSString*)cancelTitle otherButton:(NSString *) buttonTitle delegate:(id) sender {
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:sender cancelButtonTitle:cancelTitle otherButtonTitles:buttonTitle, nil];
+    
+    [alert show];
+}
+
++ (NSString *)convertNullToEmptyString:(NSString *)nullString {
+    if ([nullString isKindOfClass:[NSNull class]]) {
+        nullString = @"";
+        return nullString;
+    }
+    return nullString;
+    
+}
+
+@end

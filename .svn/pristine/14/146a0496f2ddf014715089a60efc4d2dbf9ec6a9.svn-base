@@ -1,0 +1,142 @@
+//
+//  MSALoginDecision.m
+//  MySchapp
+//
+//  Created by CK-Dev on 3/17/16.
+//  Copyright © 2016 ACA. All rights reserved.
+//
+
+#import "MSALoginDecision.h"
+#import "MSAUtils.h"
+#import "MSAConstants.h"
+
+@implementation MSALoginDecision
+
+- (void)checkLoginCriteriaWhileLaunching
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if([userDefaults valueForKey:kRefreshToken])
+    {
+        //refresh token available
+        if([self isValidRefreshToken])
+        {
+            //open landing page without login and signup options.
+        }
+        else
+        {
+            //open landing page with login and signup options
+        }
+    }
+    else    //refresh token not available
+    {
+        //open landing page with login and signup options
+    }
+}
+
+- (void)checkLoginCriteria
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if([userDefaults valueForKey:kRefreshToken])
+    {
+        //refresh token available
+        if([self isValidRefreshToken])
+        {
+            //refresh token valid
+            if([self isValidAccessToken])
+            {
+                //access token valid
+                [self checkProfileStatusAndFTL];
+            }
+            else
+            {
+                //get valid access token(and store all flag in userdefaults using refresh token then check profile status
+                [self getAccessToken];
+                [self checkProfileStatusAndFTL];
+            }
+        }
+        else
+        {
+            //open login page
+        }
+    }
+    else    //refresh token not available
+    {
+        //open login page
+    }
+}
+
+- (void)getAccessToken
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    // get access token first
+    NSString *urlString = [NSString stringWithFormat:@"%@?client_id=%@&client_secret=%@&grant_type=%@&refresh_token=%@",[NSString stringWithFormat:@"%@%@",BASE_URL,REFRESHTOKENLOGINURL],kLoginServiceClientID,kLoginServiceClientSecret,kLoginServiceGrantType,[userDefaults valueForKey:kDefaultsRefreshToken]];
+    MSANetworkHandler *networkHanlder = [[MSANetworkHandler alloc] init];
+    networkHanlder.delegate = self;
+    [networkHanlder createRequestForURLString:urlString withIdentifier:@"AccessToken" andRequestParameters:nil inView:nil];
+}
+
+- (void)checkProfileStatusAndFTL
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if(![[userDefaults valueForKey:@"PS"] isEqualToString:@"PC"])
+    {
+        if([userDefaults valueForKey:@"FTL"])
+        {
+            //open association
+        }
+        else
+        {
+            //open country selection
+        }
+    }
+    else
+    {
+        //
+    }
+}
+
+-(BOOL)isValidRefreshToken {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *expireTimeInterval = [userDefaults valueForKey:kDefaultsRefreshTokenExpiresIn];
+    NSDate *refeshTokenReceiveTime = [userDefaults valueForKey:kDefaultsRefreshTokenReceivedTime];
+    
+    NSDate *currentDateTime = [NSDate date];
+    NSDate *newDate = [refeshTokenReceiveTime dateByAddingTimeInterval:[expireTimeInterval doubleValue]];
+    if ([currentDateTime compare:newDate]== NSOrderedAscending) {
+        // Not Expired
+        return YES;
+    }
+    return NO;
+}
+
+-(BOOL)isValidAccessToken {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *expireTimeInterval = [userDefaults valueForKey:kDefaultsAccessTokenExpiresIn];
+    NSDate *accessTokenReceiveTime = [userDefaults valueForKey:kDefaultsAccessTokenReceivedTime];
+    
+    NSDate *currentDateTime = [NSDate date];
+    NSDate *newDate = [accessTokenReceiveTime dateByAddingTimeInterval:[expireTimeInterval doubleValue]];
+    if ([currentDateTime compare:newDate]== NSOrderedAscending) {
+        // Not Expired
+        return NO;
+    }
+    return NO;
+}
+
+#pragma mark - MSANetworkDelegate
+
+- (void)didReceiveData:(NSData *)responseData forRequest:(NSString *)requestId
+{
+    //received response comes here
+    NSError* err;
+    NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&err];
+    
+    NSLog(@"%@",responseDict);
+}
+
+- (void)didFailWithError:(NSError *)error forRequest:(NSString *)requestId
+{
+    
+}
+
+@end
