@@ -44,6 +44,7 @@
     NSMutableArray *tableItems;
     UIButton *backButton;
     MSALabel *locationLabel;
+    MSALabel *ofLabel;
     NSArray *distancePickerValues;
     UITextField *distanceField;
     MSASearchViewController *objSearchVC;
@@ -237,7 +238,7 @@
 {
     //label
     MSALabel *infoLabel = [[MSALabel alloc] init];
-    infoLabel.text = @"Find providers for a service category near you, check availability and request for appointments";
+    infoLabel.text = @"Find provider for a service you need to book an appointment";//@"Find providers for a service category near you, check availability and request for appointments";
     infoLabel.numberOfLines = 3;
     infoLabel.textAlignment = NSTextAlignmentCenter;
     infoLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -268,11 +269,20 @@
     distanceInputView.dataSource = self;
     distanceInputView.delegate = self;
     distanceField = [[UITextField alloc] init];
-    distanceField.text = @" 10 Miles";
+    distanceField.text = @"10 Miles";
+    distanceField.textAlignment = NSTextAlignmentCenter;
     distanceField.layer.borderWidth = 1;
+    distanceField.layer.borderColor = [UIColor lightGrayColor].CGColor;
     distanceField.layer.cornerRadius = 10;
     distanceField.inputView = distanceInputView;
     distanceField.translatesAutoresizingMaskIntoConstraints = NO;
+    UIView *rightViewDistanceField = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+    UIImageView *rightViewImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dropArrow.png"]];
+    rightViewImage.frame = CGRectMake(0, 5, 20, 20);
+    rightViewImage.contentMode = UIViewContentModeScaleAspectFit;
+    [rightViewDistanceField addSubview:rightViewImage];
+    distanceField.rightViewMode = UITextFieldViewModeAlways;
+    distanceField.rightView = rightViewDistanceField;
     [midView addSubview:distanceField];
     UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height-150-44, self.view.frame.size.width, 44)];
     toolBar.barStyle = UIBarStyleBlackOpaque;
@@ -281,8 +291,13 @@
     [toolBar setItems:[NSArray arrayWithObjects:cancelButton, [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], doneButton, nil]];
     distanceField.inputAccessoryView = toolBar;
     //label
+    ofLabel = [[MSALabel alloc] init];
+    ofLabel.text = @"of";
+    [ofLabel adjustFontSizeAccToScreenWidth:[UIFont systemFontOfSize:16]];
+    ofLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [midView addSubview:ofLabel];
     locationLabel = [[MSALabel alloc] init];
-    locationLabel.text = @"of location";
+    locationLabel.text = @"Where?";
     locationLabel.numberOfLines = 3;
     [locationLabel adjustFontSizeAccToScreenWidth:[UIFont systemFontOfSize:16]];
     locationLabel.textAlignment = NSTextAlignmentCenter;
@@ -313,7 +328,8 @@
     
    // [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"H:|-%f-[searchButton]-%f-|",self.view.frame.size.width*0.05,self.view.frame.size.width*0.05] options:0 metrics:nil views:@{@"searchButton":searchButton}]];
     [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[infoLabel(70)]-15-[infoImg(50)]-15-[category(130)]-20-[distanceLabel(20)]-5-[distanceField(42)]-10-[locationLabel(>=50)]-(>=5)-|" options:0 metrics:nil views:@{@"infoLabel":infoLabel,@"infoImg":infoImg,@"category":categoryView,@"distanceLabel":distanceLabel,@"distanceField":distanceField,@"locationLabel":locationLabel,@"searchButton":searchButton}]];
-    
+    [midView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[ofLabel]-10-[locationLabel]" options:0 metrics:nil views:@{@"ofLabel":ofLabel,@"locationLabel":locationLabel}]];
+    [midView addConstraint:[NSLayoutConstraint constraintWithItem:ofLabel attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:locationLabel attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
 }
 - (void)designLoginSignupView
 {

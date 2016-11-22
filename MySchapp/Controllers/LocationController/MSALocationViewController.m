@@ -60,7 +60,7 @@
     
     addressLabel = [[MSALabel alloc] init];
     addressLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [addressLabel setText:@"Address:"];
+    [addressLabel setText:@"Location:"];
     [addressLabel adjustFontSizeAccToScreenWidth:[UIFont systemFontOfSize:16]];
     [self.view addSubview:addressLabel];
     
@@ -72,14 +72,14 @@
     
     addressLineTxt = [[UITextField alloc]initWithFrame:CGRectZero];
     addressLineTxt.translatesAutoresizingMaskIntoConstraints = NO;
-    addressLineTxt.placeholder = @"Address";
+    addressLineTxt.placeholder = @"Postal code or City";
     addressLineTxt.borderStyle = UITextBorderStyleRoundedRect;
     [self.view addSubview:addressLineTxt];
     [addressLineTxt addTarget:self action:@selector(textChanged:) forControlEvents:UIControlEventEditingChanged];
     
     countryPickerTxt = [[UITextField alloc]initWithFrame:CGRectZero];
     countryPickerTxt.translatesAutoresizingMaskIntoConstraints = NO;
-    countryPickerTxt.placeholder = @"Select";
+    countryPickerTxt.placeholder = @"Select country";
     countryPickerTxt.borderStyle = UITextBorderStyleRoundedRect;
     countryPickerTxt.textAlignment = NSTextAlignmentLeft;
     [self.view addSubview:countryPickerTxt];

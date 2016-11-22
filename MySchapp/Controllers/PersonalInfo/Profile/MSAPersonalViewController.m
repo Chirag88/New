@@ -47,6 +47,7 @@
     UITextField *dunsNumberTxt;
     NSLayoutConstraint *companyRegViewHeight;
     
+    UILabel *workExpLbl;
     UITextField *workExpTxt;
     UITextField *addressLine1Txt;
     UITextField *addressLine2Txt;
@@ -60,7 +61,7 @@
     UITextField *mobileTxt;
     UITextField *phoneTxt;
     UITextField *dobTxt;
-    UITextField *currencyTxt;
+    UITextField *designationTxt;
     MSALabel *languagesLbl;
     MSALabel *educationLbl;
     MSALabel *languagesCountLbl;
@@ -420,11 +421,18 @@
     dobTxt.inputAccessoryView = toolBar1;
     
     
-    currencyTxt = [[UITextField alloc]initWithFrame:CGRectZero];
-    currencyTxt.translatesAutoresizingMaskIntoConstraints = NO;
-    currencyTxt.placeholder = @"Currency";
-    currencyTxt.borderStyle = UITextBorderStyleRoundedRect;
-    [self.scrollView addSubview:currencyTxt];
+    designationTxt = [[UITextField alloc]initWithFrame:CGRectZero];
+    designationTxt.translatesAutoresizingMaskIntoConstraints = NO;
+    designationTxt.placeholder = @"Designation";
+    designationTxt.borderStyle = UITextBorderStyleRoundedRect;
+    [self.scrollView addSubview:designationTxt];
+    
+    workExpLbl = [[UILabel alloc] init];
+    workExpLbl.translatesAutoresizingMaskIntoConstraints = NO;
+    workExpLbl.text = @"Work Experience (in Months)";
+    workExpLbl.font = [UIFont fontWithName:@"Helvetica" size:14];
+    workExpLbl.textColor = [UIColor grayColor];
+    [self.scrollView addSubview:workExpLbl];
     
     workExpTxt = [[UITextField alloc]initWithFrame:CGRectZero];
     workExpTxt.translatesAutoresizingMaskIntoConstraints = NO;
@@ -564,9 +572,9 @@
 // Apply constraints
 - (void)applyConstraints {
     
-    NSDictionary *views = @{@"firstNameTxt":firstNameTxt,@"lastNameTxt":lastNameTxt,@"companyRegView":companyRegView,@"addressLine1Txt":addressLine1Txt,@"addressLine2Txt":addressLine2Txt,@"zipTxt":zipTxt,@"cityTxt":cityTxt,@"stateTxt":stateTxt,@"countryPickerTxt":countryPickerTxt,@"emailTxt":emailTxt,@"genderLbl":genderLbl,@"phoneTxt":phoneTxt,@"mobileTxt":mobileTxt,@"dobTxt":dobTxt,@"currencyTxt":currencyTxt,@"languageView":languageView,@"educationView":educationView,@"profileImage":profileImage,@"workExpTxt":workExpTxt};
+    NSDictionary *views = @{@"firstNameTxt":firstNameTxt,@"lastNameTxt":lastNameTxt,@"companyRegView":companyRegView,@"addressLine1Txt":addressLine1Txt,@"addressLine2Txt":addressLine2Txt,@"zipTxt":zipTxt,@"cityTxt":cityTxt,@"stateTxt":stateTxt,@"countryPickerTxt":countryPickerTxt,@"emailTxt":emailTxt,@"genderLbl":genderLbl,@"phoneTxt":phoneTxt,@"mobileTxt":mobileTxt,@"dobTxt":dobTxt,@"designationTxt":designationTxt,@"languageView":languageView,@"educationView":educationView,@"profileImage":profileImage,@"workExpTxt":workExpTxt,@"workExpLbl":workExpLbl};
     
-    [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[firstNameTxt(45)]-10-[lastNameTxt(45)]-10-[companyRegView]-10-[addressLine1Txt(45)]-10-[addressLine2Txt(45)]-10-[zipTxt(45)]-10-[cityTxt(45)]-10-[stateTxt(45)]-10-[countryPickerTxt(45)]-10-[emailTxt(45)]-10-[genderLbl(45)]-10-[phoneTxt(45)]-10-[mobileTxt(45)]-10-[dobTxt(45)]-10-[currencyTxt(45)]-10-[workExpTxt(45)]-10-[languageView(45)]-10-[educationView(45)]-10-|" options:0 metrics:nil views:views]];
+    [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-[firstNameTxt(45)]-10-[lastNameTxt(45)]-10-[companyRegView]-10-[addressLine1Txt(45)]-10-[addressLine2Txt(45)]-10-[zipTxt(45)]-10-[cityTxt(45)]-10-[stateTxt(45)]-10-[countryPickerTxt(45)]-10-[emailTxt(45)]-10-[genderLbl(45)]-10-[phoneTxt(45)]-10-[mobileTxt(45)]-10-[dobTxt(45)]-10-[designationTxt(45)]-10-[workExpLbl(20)]-5-[workExpTxt(45)]-10-[languageView(45)]-10-[educationView(45)]-10-|" options:0 metrics:nil views:views]];
     
     // profileImage
     [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:profileImage attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:80]];
@@ -681,9 +689,13 @@
     [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:dobTxt attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeWidth multiplier:0.90 constant:0]];
     [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:dobTxt attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
-    // Currency
-    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:currencyTxt attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeWidth multiplier:0.90 constant:0]];
-    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:currencyTxt attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    // Designation
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:designationTxt attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeWidth multiplier:0.90 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:designationTxt attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+    
+    // workExpLbl
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:workExpLbl attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeWidth multiplier:0.90 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:workExpLbl attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
     
     // workExpTxt
     [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:workExpTxt attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.scrollView attribute:NSLayoutAttributeWidth multiplier:0.90 constant:0]];
@@ -846,7 +858,7 @@
     phoneTxt.text = [MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfilePhone]];
     mobileTxt.text = [MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfileMobile]];
     dobTxt.text = [MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfileDob]];
-    currencyTxt.text = [MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfileSelectedCurrency]];
+    designationTxt.text = [MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfileSelectedDesignation]];
     
     long workEx = [[MSAUtils convertNullToEmptyString:[personalDetails objectForKey:kProfileWorkExperience]] integerValue];
     workExpTxt.text = [NSString stringWithFormat:@"%ld months",workEx];
@@ -925,7 +937,7 @@
     [submitPersonalDetails setObject:mobileTxt.text forKey:kProfileMobile];
     [submitPersonalDetails setObject:phoneTxt.text forKey:kProfilePhone];
     [submitPersonalDetails setObject:dobTxt.text forKey:kProfileDob];
-    [submitPersonalDetails setObject:currencyTxt.text forKey:kProfileSelectedCurrency];
+    [submitPersonalDetails setObject:designationTxt.text forKey:kProfileSelectedDesignation];
     [submitPersonalDetails setObject:[NSNumber numberWithInteger:[[workExpTxt.text stringByReplacingOccurrencesOfString:@"months" withString:@""] integerValue]] forKey:kProfileWorkExperience];
     
     if ([languagesCountLbl.text isEqualToString:@"0"])

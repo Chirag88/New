@@ -81,7 +81,11 @@
     if ([requestId isEqualToString:@"TermsAndConditions"]) {
         if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
             NSLog(@"Got Terms Data");
-            termsString = [responseDict objectForKey:@"fileContents"];
+            NSString *base64EncodedTermsString = [responseDict objectForKey:@"fileContents"];
+            int padLength = (4 - (base64EncodedTermsString.length % 4)) % 4;
+            NSString *paddedBase64 = [NSString stringWithFormat:@"%s%.*s", [base64EncodedTermsString UTF8String], padLength, "=="];
+            NSData *nsdataFromBase64String = [[NSData alloc] initWithBase64EncodedString:paddedBase64 options:0];
+            termsString = [[NSString alloc] initWithData:nsdataFromBase64String encoding:NSStringEncodingConversionAllowLossy];
             self.termsTextView.text = termsString;
         }
         else {

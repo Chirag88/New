@@ -18,7 +18,7 @@
 
 #pragma mark - Application Urls
 // URLS
-#define BASEURL                         @"http://50.168.110.172:1487/schmobileapp/"
+#define BASEURL                         @"http://73.241.100.44:1487/schmobileapp/"
 #define SIGNUPURL                       @"loginsignup/A26"
 #define VERIFYOTPURL                    @"loginsignup/A27"
 #define REFRESHTOKENLOGINURL            @"oauth/token"
@@ -166,7 +166,7 @@
 #define kProfilePhone               @"phone"
 #define kProfileGender              @"gender"
 #define kProfileBillingType         @"billingType"
-#define kProfileSelectedCurrency    @"selectedCurrency"
+#define kProfileSelectedDesignation @"selectedDesignation"
 #define kProfileWorkExperience      @"workexperience"
 #define kProfileSelectedLanguages   @"selectedLanguages"
 #define kProfileListofCert          @"listofCert"

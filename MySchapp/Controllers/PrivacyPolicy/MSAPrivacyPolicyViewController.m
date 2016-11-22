@@ -53,7 +53,11 @@
    // NSLog(@"%@",responseDict);
     if([[responseDict valueForKey:@"rCode"] isEqualToString:@"00"]) {
         NSLog(@"Got Privacy Data");
-        privacyString = [responseDict objectForKey:@"fileContents"];
+        NSString *base64EncodedPrivacyString = [responseDict objectForKey:@"fileContents"];
+        int padLength = (4 - (base64EncodedPrivacyString.length % 4)) % 4;
+        NSString *paddedBase64 = [NSString stringWithFormat:@"%s%.*s", [base64EncodedPrivacyString UTF8String], padLength, "=="];
+        NSData *nsdataFromBase64String = [[NSData alloc] initWithBase64EncodedString:paddedBase64 options:0];
+        privacyString = [[NSString alloc] initWithData:nsdataFromBase64String encoding:NSStringEncodingConversionAllowLossy];
         self.privacyTextView.text = privacyString;
     }
     else {
