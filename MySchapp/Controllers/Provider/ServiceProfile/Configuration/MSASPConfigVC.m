@@ -6,20 +6,19 @@
 //  Copyright © 2016 ACA. All rights reserved.
 //
 
-#import "MSAServiceProfileVC.h"
+#import "MSASPConfigVC.h"
 #import "MSAConstants.h"
 #import "MSAUtils.h"
-#import "MSAServiceProfileTableViewCell.h"
-#import "MSASPConfigVC.h"
+#import "MSASPConfigTableViewCell.h"
 
-@interface MSAServiceProfileVC (){
+@interface MSASPConfigVC (){
     NSArray *homeItems;
     __weak IBOutlet UITableView *homeList;
 }
 
 @end
 
-@implementation MSAServiceProfileVC
+@implementation MSASPConfigVC
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -28,9 +27,9 @@
     [MSAUtils setNavigationBarAttributes:self.navigationController];
     
     self.navigationController.navigationBarHidden = NO;
-    self.navigationItem.title = @"Service Profile";
+    self.navigationItem.title = @"Configuration";
     
-    homeItems = @[@"Specialities",@"Configuration",@"Work Calender",@"Duration"];
+    homeItems = @[@"Generic",@"Speciality",@"Appointment",@"Advance"];
     homeList.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
 
@@ -51,11 +50,11 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    static NSString *CellIdentifier = @"MSAServiceProfileTableViewCell";
+    static NSString *CellIdentifier = @"MSASPConfigTableViewCell";
     
-    MSAServiceProfileTableViewCell *cell = (MSAServiceProfileTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    MSASPConfigTableViewCell *cell = (MSASPConfigTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = (MSAServiceProfileTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSAServiceProfileTableViewCell" owner:self options:nil] objectAtIndex:0];
+        cell = (MSASPConfigTableViewCell *) [[[NSBundle mainBundle] loadNibNamed:@"MSASPConfigTableViewCell" owner:self options:nil] objectAtIndex:0];
     }
     cell.selectionStyle = UITableViewCellSeparatorStyleNone;
     cell.backView.backgroundColor = kMySchappLightBlueColor;
@@ -68,10 +67,6 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath  {
     
     if (indexPath.row == 1) {
-        UIStoryboard *mainStoryboard = UISTORYBOARD;
-        MSASPConfigVC *serviceProfile  = (MSASPConfigVC*)[mainStoryboard
-                                                                      instantiateViewControllerWithIdentifier:@"MSASPConfigVC"];
-        [self.navigationController pushViewController:serviceProfile animated:YES];
         
     }
     
